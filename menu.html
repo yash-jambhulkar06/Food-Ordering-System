@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gourmet Menu – SpiceRoute Online Food Ordering</title>
+    <meta name="description" content="Explore handcrafted starters, royal main course, stone-baked pizzas, burgers, refreshing beverages, and artisan desserts.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span></span>
+            </a>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="menu.html" class="nav-link active">Menu</a></li>
+                <li><a href="orders.html" class="nav-link">My Orders</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="cart.html" class="cart-btn-link" title="Shopping Cart">
+                    <span>🛒 Cart</span>
+                    <span class="cart-badge-count" id="navCartBadge">0</span>
+                </a>
+                <div id="navUserSlot" style="display:flex; align-items:center; gap:12px;"></div>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">&#9776;</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header Banner -->
+    <section style="background:linear-gradient(135deg, #1c1c24, #2d2d3a); color:#fff; padding:48px 0; border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div class="container" style="text-align:center;">
+            <span style="color:var(--accent); font-weight:700; text-transform:uppercase; font-size:0.85rem; letter-spacing:1px;">Culinary Catalog</span>
+            <h1 style="font-size:2.8rem; color:#fff; margin-top:8px;">Gourmet Kitchen Menu</h1>
+            <p style="color:#9ca3af; max-width:600px; margin:10px auto 0; font-size:1.05rem;">
+                Browse our selection of freshly prepared dishes, crafted with royal heritage recipes.
+            </p>
+        </div>
+    </section>
+
+    <!-- Menu Interaction Section -->
+    <section class="section" style="padding: 40px 0 80px;">
+        <div class="container">
+            <!-- Filter & Search Controls -->
+            <div class="menu-controls">
+                <div class="search-field-wrap">
+                    <span class="search-ico">🔍</span>
+                    <input type="text" id="searchInput" aria-label="Search dishes by name" title="Type dish name to search">
+                </div>
+
+                <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                    <label for="sortSelect" style="font-size:0.88rem; font-weight:600; color:var(--text-muted);">Sort by:</label>
+                    <select id="sortSelect" class="sort-select" aria-label="Sort dishes by price">
+                        <option value="featured">Featured Ordering</option>
+                        <option value="low-to-high">Price: Low to High</option>
+                        <option value="high-to-low">Price: High to Low</option>
+                        <option value="alphabetical">Name: A to Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Category Pills Bar -->
+            <div class="category-chips-bar" style="margin-bottom:30px;" id="menuCategoriesBar">
+                <button class="chip-btn active" data-cat="All">All Items</button>
+                <button class="chip-btn" data-cat="Starters">Starters</button>
+                <button class="chip-btn" data-cat="Main Course">Main Course</button>
+                <button class="chip-btn" data-cat="Pizza and Burgers">Pizza and Burgers</button>
+                <button class="chip-btn" data-cat="Beverages">Beverages</button>
+                <button class="chip-btn" data-cat="Desserts">Desserts</button>
+            </div>
+
+            <!-- Active Results Counter -->
+            <div style="margin-bottom:20px; font-size:0.92rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
+                <span id="resultsCount">Showing all dishes</span>
+            </div>
+
+            <!-- Food Items Grid -->
+            <div class="food-cards-grid" id="menuGrid">
+                <!-- Dynamically populated via JavaScript -->
+            </div>
+
+            <!-- Empty Search State -->
+            <div id="emptyMenuState" style="display:none; text-align:center; padding:60px 20px; background:#fff; border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-top:20px;">
+                <div style="font-size:3.5rem; margin-bottom:14px;">🍽️</div>
+                <h3 style="font-size:1.4rem; color:var(--secondary); margin-bottom:8px;">No matching dishes found</h3>
+                <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:20px;">Please check spelling or choose a different category filter.</p>
+                <button id="resetFiltersBtn" class="btn btn-outline btn-sm">Clear All Filters</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comprehensive Footer -->
+    <footer class="footer-wrap">
+        <div class="container">
+            <div class="footer-columns">
+                <div class="footer-col">
+                    <h3 style="font-size:1.5rem; display:flex; align-items:center; gap:8px;">
+                        <span>🍛</span> SpiceRoute
+                    </h3>
+                    <p style="font-size:0.92rem; line-height:1.6; margin-bottom:16px;">
+                        Authentic culinary specialties, stone-baked pizzas, and artisan desserts prepared fresh on order.
+                    </p>
+                    <p style="font-size:0.85rem; color:#cbd5e1;">
+                        📍 Central Kitchen: Bandra West, Mumbai, MH - 400050<br>
+                        📞 Order Hotline: +91 98201 54321
+                    </p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="menu.html">Explore Menu</a></li>
+                        <li><a href="cart.html">View Cart</a></li>
+                        <li><a href="orders.html">Track Order</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Menu Sections</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="menu.html?cat=Starters">Tandoori Starters</a></li>
+                        <li><a href="menu.html?cat=Main+Course">Royal Main Course</a></li>
+                        <li><a href="menu.html?cat=Pizza+and+Burgers">Woodfired Pizzas</a></li>
+                        <li><a href="menu.html?cat=Beverages">Cool Beverages</a></li>
+                        <li><a href="menu.html?cat=Desserts">Artisan Desserts</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Restaurant Policies</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="index.html#about">About Our Kitchen</a></li>
+                        <li><a href="index.html#privacy">Privacy Policy</a></li>
+                        <li><a href="index.html#terms">Terms of Service</a></li>
+                        <li><a href="login.html">Staff Login</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-copyright">
+                <p>&copy; 2026 SpiceRoute Restaurant Private Limited. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/store.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let activeCategory = 'All';
+            let searchQuery = '';
+            let currentSort = 'featured';
+
+            // Check URL parameters for direct category link
+            const urlParams = new URLSearchParams(window.location.search);
+            const catParam = urlParams.get('cat');
+            if (catParam) {
+                activeCategory = catParam;
+            }
+
+            const menuGrid = document.getElementById('menuGrid');
+            const searchInput = document.getElementById('searchInput');
+            const sortSelect = document.getElementById('sortSelect');
+            const emptyMenuState = document.getElementById('emptyMenuState');
+            const resultsCount = document.getElementById('resultsCount');
+
+            function renderCategoryBar() {
+                const cats = Store.getCategories();
+                const bar = document.getElementById('menuCategoriesBar');
+                if (bar && cats.length > 0) {
+                    bar.innerHTML = `
+                        <button class="chip-btn ${activeCategory === 'All' ? 'active' : ''}" data-cat="All">All Items</button>
+                        ${cats.map(c => `
+                            <button class="chip-btn ${activeCategory.toLowerCase() === c.toLowerCase() ? 'active' : ''}" data-cat="${c}">${c}</button>
+                        `).join('')}
+                    `;
+
+                    bar.querySelectorAll('.chip-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            bar.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            activeCategory = btn.getAttribute('data-cat');
+                            renderMenu();
+                        });
+                    });
+                }
+            }
+
+            function renderMenu() {
+                let items = Store.getMenu();
+
+                // 1. Filter by category
+                if (activeCategory !== 'All') {
+                    items = items.filter(i => i.category.toLowerCase() === activeCategory.toLowerCase());
+                }
+
+                // 2. Filter by search query
+                if (searchQuery) {
+                    items = items.filter(i => 
+                        i.name.toLowerCase().includes(searchQuery) || 
+                        i.description.toLowerCase().includes(searchQuery) ||
+                        i.category.toLowerCase().includes(searchQuery)
+                    );
+                }
+
+                // 3. Sort items
+                if (currentSort === 'low-to-high') {
+                    items.sort((a, b) => a.price - b.price);
+                } else if (currentSort === 'high-to-low') {
+                    items.sort((a, b) => b.price - a.price);
+                } else if (currentSort === 'alphabetical') {
+                    items.sort((a, b) => a.name.localeCompare(b.name));
+                }
+
+                // Update counter
+                resultsCount.textContent = `Showing ${items.length} ${items.length === 1 ? 'dish' : 'dishes'}`;
+
+                // Render or show empty state
+                if (items.length === 0) {
+                    menuGrid.innerHTML = '';
+                    emptyMenuState.style.display = 'block';
+                } else {
+                    emptyMenuState.style.display = 'none';
+                    menuGrid.innerHTML = items.map(dish => `
+                        <div class="dish-card">
+                            <div class="dish-img-wrap">
+                                <img src="${dish.image}" alt="${dish.name}" class="dish-img" onerror="App.handleImageError(this)">
+                                <span class="dish-badge-category">${dish.category}</span>
+                                <span class="dish-badge-status ${dish.availability ? 'available' : 'soldout'}">
+                                    ${dish.availability ? 'Available' : 'Sold Out'}
+                                </span>
+                            </div>
+                            <div class="dish-content">
+                                <h3 class="dish-title">${dish.name}</h3>
+                                <p class="dish-desc">${dish.description}</p>
+                                <div class="dish-footer">
+                                    <span class="dish-price">Rs. ${dish.price}</span>
+                                    ${dish.availability ? `
+                                        <button onclick="App.handleAddToCart(${dish.item_id}, '${dish.name.replace(/'/g, "\\'")}', ${dish.price})" class="btn btn-primary btn-sm">
+                                            + Add to Cart
+                                        </button>
+                                    ` : `
+                                        <button class="btn btn-outline btn-sm" disabled style="opacity:0.6; cursor:not-allowed;">Sold Out</button>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            renderCategoryBar();
+            renderMenu();
+            window.addEventListener('storeSynced', () => {
+                renderCategoryBar();
+                renderMenu();
+            });
+
+            // Search input listener
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                renderMenu();
+            });
+
+            // Sort dropdown listener
+            sortSelect.addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                renderMenu();
+            });
+
+            // Category buttons listener
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeCategory = btn.getAttribute('data-cat');
+                    renderMenu();
+                });
+            });
+
+            // Reset filters button
+            const resetBtn = document.getElementById('resetFiltersBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    searchQuery = '';
+                    activeCategory = 'All';
+                    sortSelect.value = 'featured';
+                    currentSort = 'featured';
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    categoryBtns[0].classList.add('active');
+                    renderMenu();
+                });
+            }
+
+            // Initial render
+            renderMenu();
+        });
+    </script>
+</body>
+</html>

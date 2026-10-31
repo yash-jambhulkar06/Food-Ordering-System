@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders & Live Tracking – SpiceRoute</title>
+    <meta name="description" content="View past order history, live order progress stepper, and submit dining feedback.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span></span>
+            </a>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="menu.html" class="nav-link">Menu</a></li>
+                <li><a href="orders.html" class="nav-link active">My Orders</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="cart.html" class="cart-btn-link" title="Shopping Cart">
+                    <span>🛒 Cart</span>
+                    <span class="cart-badge-count" id="navCartBadge">0</span>
+                </a>
+                <div id="navUserSlot" style="display:flex; align-items:center; gap:12px;"></div>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">&#9776;</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section style="background:#fff; padding:28px 0; border-bottom:1px solid var(--border-color);">
+        <div class="container">
+            <h1 style="font-size:2.2rem; color:var(--secondary);">Order History & Live Tracking</h1>
+            <p style="color:var(--text-muted); font-size:0.95rem;">Track current preparation stages, review receipts, and rate delivered meals.</p>
+        </div>
+    </section>
+
+    <!-- Orders Section -->
+    <section class="section" style="padding: 40px 0 80px;">
+        <div class="container">
+            <!-- Quick Order Tracking Search Box -->
+            <div style="background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px 20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:40px; height:40px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.3rem;">
+                        📍
+                    </div>
+                    <div>
+                        <div style="font-weight:700; color:var(--secondary); font-size:1rem;">Live Order Status Lookup</div>
+                        <div style="font-size:0.84rem; color:var(--text-muted);">Enter any Order Number (e.g. 1005, 1004, 1003) to inspect live preparation and delivery status</div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <input type="number" id="quickTrackInput" placeholder="Enter Order ID..." style="padding:9px 14px; border:1px solid var(--border-color); border-radius:var(--radius-sm); width:170px; font-weight:600; outline:none;">
+                    <button id="quickTrackBtn" class="btn btn-primary btn-sm">Track Status</button>
+                    <button id="btnSyncDb" class="btn btn-outline btn-sm" title="Reload from SQLite Database">🔄 Sync Database</button>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div style="display:flex; gap:10px; margin-bottom:28px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                <button class="chip-btn active" id="tabAll">All Orders</button>
+                <button class="chip-btn" id="tabActive">In Progress</button>
+                <button class="chip-btn" id="tabDelivered">Delivered</button>
+            </div>
+
+            <!-- Orders Cards Container -->
+            <div id="ordersListContainer" style="display:flex; flex-direction:column; gap:24px;">
+                <!-- Populated dynamically via JavaScript -->
+            </div>
+
+            <!-- Empty Orders State -->
+            <div id="emptyOrdersState" style="display:none; text-align:center; padding:60px 20px; background:#fff; border-radius:var(--radius-lg); border:1px solid var(--border-color);">
+                <div style="font-size:3.5rem; margin-bottom:12px;">📦</div>
+                <h3 style="font-size:1.4rem; color:var(--secondary); margin-bottom:6px;">No orders found</h3>
+                <p style="color:var(--text-muted); margin-bottom:20px;">You haven't placed any orders in this category yet.</p>
+                <div style="display:flex; justify-content:center; gap:12px;">
+                    <button id="btnShowAllFallback" class="btn btn-outline">View All Orders in System</button>
+                    <a href="menu.html" class="btn btn-primary">Browse Kitchen Menu</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-wrap">
+        <div class="container">
+            <div class="footer-copyright">
+                <p>&copy; 2026 SpiceRoute Restaurant Private Limited. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/store.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const listContainer = document.getElementById('ordersListContainer');
+            const emptyState = document.getElementById('emptyOrdersState');
+            const quickTrackInput = document.getElementById('quickTrackInput');
+            const quickTrackBtn = document.getElementById('quickTrackBtn');
+            const btnSyncDb = document.getElementById('btnSyncDb');
+            const btnShowAllFallback = document.getElementById('btnShowAllFallback');
+
+            let currentFilter = 'All';
+            let activeTrackId = null;
+
+            const tabAll = document.getElementById('tabAll');
+            const tabDelivered = document.getElementById('tabDelivered');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const trackTargetId = urlParams.get('track') || urlParams.get('new_order_id');
+            if (trackTargetId) {
+                activeTrackId = trackTargetId;
+                if (quickTrackInput) quickTrackInput.value = trackTargetId;
+                if (urlParams.get('new_order_id')) {
+                    setTimeout(() => {
+                        App.showToast(`🎉 Order #${trackTargetId} Placed Successfully!`, 'success');
+                    }, 400);
+                }
+            }
+
+            function getStatusClass(status) {
+                switch(status) {
+                    case 'Placed': return 'status-placed';
+                    case 'Preparing': return 'status-preparing';
+                    case 'Packed': return 'status-packed';
+                    case 'Out for Delivery': return 'status-delivery';
+                    case 'Delivered': return 'status-delivered';
+                    case 'Cancelled': return 'status-cancelled';
+                    default: return 'status-placed';
+                }
+            }
+
+            function getStepClasses(currentStatus) {
+                const statusOrder = ['Placed', 'Preparing', 'Packed', 'Out for Delivery', 'Delivered'];
+                const currentIndex = statusOrder.indexOf(currentStatus);
+
+                return {
+                    placed: currentIndex >= 0 ? (currentIndex === 0 ? 'active' : 'completed') : '',
+                    preparing: currentIndex >= 1 ? (currentIndex === 1 ? 'active' : 'completed') : '',
+                    packed: currentIndex >= 2 ? (currentIndex === 2 ? 'active' : 'completed') : '',
+                    outForDelivery: currentIndex >= 3 ? (currentIndex === 3 ? 'active' : 'completed') : '',
+                    delivered: currentIndex >= 4 ? 'completed' : ''
+                };
+            }
+
+            async function renderOrders(specifiedId = null) {
+                const targetSearchId = specifiedId || activeTrackId;
+                const currentUser = Store.getCurrentUser();
+                const userId = currentUser ? currentUser.user_id : null;
+
+                let orders = [];
+
+                if (targetSearchId) {
+                    const specific = await Store.getOrderById(targetSearchId);
+                    if (specific) {
+                        orders = [specific];
+                    }
+                }
+
+                if (orders.length === 0) {
+                    // Pull user-specific orders
+                    orders = await Store.getOrders(userId ? { user_id: userId } : {});
+                }
+
+                // If user list is empty, fallback to all orders in database
+                if (orders.length === 0) {
+                    orders = await Store.getOrders({});
+                }
+
+                // Filter tabs
+                if (currentFilter === 'Active') {
+                    orders = orders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled');
+                } else if (currentFilter === 'Delivered') {
+                    orders = orders.filter(o => o.status === 'Delivered');
+                }
+
+                if (orders.length === 0) {
+                    listContainer.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+
+                listContainer.innerHTML = orders.map(order => {
+                    const steps = getStepClasses(order.status);
+                    const isDelivered = order.status === 'Delivered';
+                    const items = order.items && order.items.length > 0 ? order.items : [];
+
+                    return `
+                        <div class="panel-card" id="order_card_${order.order_id}" style="${targetSearchId && Number(targetSearchId) === Number(order.order_id) ? 'border: 2px solid var(--primary); box-shadow: 0 4px 16px rgba(226,55,68,0.15);' : ''}">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; border-bottom:1px solid var(--border-color); padding-bottom:14px;">
+                                <div>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <h3 style="font-size:1.25rem; color:var(--secondary); margin-bottom:4px;">
+                                            Order #${order.order_id}
+                                        </h3>
+                                        ${targetSearchId && Number(targetSearchId) === Number(order.order_id) ? '<span class="chip-btn active" style="font-size:0.75rem; padding:2px 8px;">Target Order</span>' : ''}
+                                    </div>
+                                    <span style="font-size:0.85rem; color:var(--text-muted);">
+                                        Placed on ${order.order_date}
+                                    </span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:14px;">
+                                    <span class="status-pill ${getStatusClass(order.status)}">
+                                        ${order.status}
+                                    </span>
+                                    <span style="font-size:1.3rem; font-weight:800; color:var(--primary);">
+                                        Rs. ${order.total_amount}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Stepper Display -->
+                            <div class="order-stepper" style="margin:24px 0 20px;">
+                                <div class="stepper-step ${steps.placed}">
+                                    <div class="stepper-circle">📝</div>
+                                    <div class="stepper-title">Placed</div>
+                                </div>
+                                <div class="stepper-step ${steps.preparing}">
+                                    <div class="stepper-circle">🍳</div>
+                                    <div class="stepper-title">Preparing</div>
+                                </div>
+                                <div class="stepper-step ${steps.packed}">
+                                    <div class="stepper-circle">📦</div>
+                                    <div class="stepper-title">Food Packed</div>
+                                </div>
+                                <div class="stepper-step ${steps.outForDelivery}">
+                                    <div class="stepper-circle">🛵</div>
+                                    <div class="stepper-title">Out for Delivery</div>
+                                </div>
+                                <div class="stepper-step ${steps.delivered}">
+                                    <div class="stepper-circle">🏠</div>
+                                    <div class="stepper-title">Delivered</div>
+                                </div>
+                            </div>
+
+                            <!-- Items Summary -->
+                            <div style="background:var(--bg-main); border-radius:var(--radius-sm); padding:16px; margin-bottom:16px;">
+                                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:10px;">
+                                    ${items.length > 0 ? items.map(i => `
+                                        <div style="display:flex; align-items:center; gap:10px; font-size:0.9rem;">
+                                            <img src="${i.image || 'assets/images/paneer-pizza.jpg'}" alt="${i.name || 'Dish'}" style="width:36px; height:36px; border-radius:6px; object-fit:cover;" onerror="App.handleImageError(this)">
+                                            <div>
+                                                <strong>${i.quantity}x</strong> ${i.name || 'Gourmet Dish'} (Rs. ${i.price})
+                                            </div>
+                                        </div>
+                                    `).join('') : '<span style="color:var(--text-muted); font-size:0.85rem;">Delicious Gourmet Order</span>'}
+                                </div>
+                            </div>
+
+                            <!-- Footer Details -->
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; font-size:0.88rem; color:var(--text-muted);">
+                                <div>
+                                    <span>📍 Delivery Address: <strong style="color:var(--secondary);">${order.delivery_address || 'Address on file'}</strong></span>
+                                </div>
+                                <div>
+                                    <span style="color:var(--info); font-weight:600;">
+                                        ${isDelivered ? '✓ Order Completed & Delivered' : '⏱ In Progress'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Smooth scroll to target order
+                if (targetSearchId) {
+                    const targetElem = document.getElementById(`order_card_${targetSearchId}`);
+                    if (targetElem) {
+                        targetElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }
+
+            // Quick Tracking Search Button Handlers
+            if (quickTrackBtn && quickTrackInput) {
+                quickTrackBtn.addEventListener('click', () => {
+                    const queryId = quickTrackInput.value.trim();
+                    if (!queryId) {
+                        App.showToast('Please enter an order number (e.g. 1005)', 'error');
+                        return;
+                    }
+                    activeTrackId = queryId;
+                    renderOrders(queryId);
+                    App.showToast(`Tracking status for Order #${queryId}`, 'success');
+                });
+
+                quickTrackInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        quickTrackBtn.click();
+                    }
+                });
+            }
+
+            // Database Sync Button
+            if (btnSyncDb) {
+                btnSyncDb.addEventListener('click', async () => {
+                    btnSyncDb.disabled = true;
+                    btnSyncDb.textContent = 'Syncing...';
+                    await Store.syncFromBackend();
+                    App.showToast('Connected and synchronized with SQLite database!', 'success');
+                    btnSyncDb.disabled = false;
+                    btnSyncDb.textContent = '🔄 Sync Database';
+                    renderOrders();
+                });
+            }
+
+            if (btnShowAllFallback) {
+                btnShowAllFallback.addEventListener('click', () => {
+                    activeTrackId = null;
+                    if (quickTrackInput) quickTrackInput.value = '';
+                    renderOrders();
+                });
+            }
+
+            // Tab Switchers
+            tabAll.onclick = () => {
+                tabAll.classList.add('active'); tabActive.classList.remove('active'); tabDelivered.classList.remove('active');
+                currentFilter = 'All'; activeTrackId = null; renderOrders();
+            };
+            tabActive.onclick = () => {
+                tabActive.classList.add('active'); tabAll.classList.remove('active'); tabDelivered.classList.remove('active');
+                currentFilter = 'Active'; activeTrackId = null; renderOrders();
+            };
+            tabDelivered.onclick = () => {
+                tabDelivered.classList.add('active'); tabAll.classList.remove('active'); tabActive.classList.remove('active');
+                currentFilter = 'Delivered'; activeTrackId = null; renderOrders();
+            };
+
+            // Initial fetch & render
+            renderOrders();
+            window.addEventListener('storeSynced', renderOrders);
+        });
+    </script>
+</body>
+</html>

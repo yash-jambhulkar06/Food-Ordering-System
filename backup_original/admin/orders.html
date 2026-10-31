@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Orders Administration – SpiceRoute</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span> <small style="font-size:0.75rem; color:var(--primary); font-weight:700; text-transform:uppercase; margin-left:6px; letter-spacing:1px;">Admin</small></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="../index.html" class="btn btn-outline btn-sm">Customer View</a>
+                <button onclick="App.handleLogout()" class="btn btn-danger btn-sm">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Master Layout -->
+    <div class="admin-layout-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                Restaurant Hub
+            </div>
+            <ul class="admin-nav-links">
+                <li><a href="index.html" class="admin-nav-link"><span>📊</span> Dashboard</a></li>
+                <li><a href="menu.html" class="admin-nav-link"><span>🍽️</span> Menu Catalog</a></li>
+                <li><a href="categories.html" class="admin-nav-link"><span>🏷️</span> Categories</a></li>
+                <li><a href="orders.html" class="admin-nav-link active"><span>📦</span> Live Orders</a></li>
+                <li><a href="../hotel/index.html" class="admin-nav-link" style="color:#d97706; font-weight:700;"><span>🏨</span> Hotel Kitchen (KDS)</a></li>
+                <li><a href="reports.html" class="admin-nav-link"><span>📈</span> Sales Analytics</a></li>
+                <li><a href="feedback.html" class="admin-nav-link"><span>⭐</span> Guest Reviews</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="admin-content-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+                <div>
+                    <h1 style="font-size:2rem; color:var(--secondary); margin-bottom:4px;">Customer Orders Manager</h1>
+                    <p style="color:var(--text-muted); font-size:0.92rem;">Update kitchen prep states, assign delivery couriers, and review invoices.</p>
+                </div>
+            </div>
+
+            <!-- Filters Bar -->
+            <div style="background:#fff; padding:18px 24px; border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;" id="orderStatusFilters">
+                    <button class="chip-btn active" data-status="All">All</button>
+                    <button class="chip-btn" data-status="Placed">Placed</button>
+                    <button class="chip-btn" data-status="Preparing">Preparing</button>
+                    <button class="chip-btn" data-status="Packed">Packed</button>
+                    <button class="chip-btn" data-status="Out for Delivery">Out for Delivery</button>
+                    <button class="chip-btn" data-status="Delivered">Delivered</button>
+                    <button class="chip-btn" data-status="Cancelled">Cancelled</button>
+                </div>
+
+                <div style="min-width:240px;">
+                    <input type="text" id="orderSearchInput" class="input-control" aria-label="Search orders" title="Type Order ID or customer name">
+                </div>
+            </div>
+
+            <!-- Orders Master Table -->
+            <div class="panel-card" style="padding:0; overflow:hidden;">
+                <div class="data-table-wrap" style="border:none;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer & Contact</th>
+                                <th>Items Ordered</th>
+                                <th>Total</th>
+                                <th>Courier Assignment</th>
+                                <th>Status Action</th>
+                                <th style="text-align:center;">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTbody">
+                            <!-- Populated dynamically via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Order View Modal -->
+    <div id="orderViewModal" class="modal-backdrop">
+        <div class="modal-window" style="max-width:600px;">
+            <div class="modal-head">
+                <h3 id="modalOrderHeading">Order Information</h3>
+                <button class="modal-dismiss" onclick="App.closeModal('orderViewModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="modalOrderContent">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tbody = document.getElementById('ordersTbody');
+            const searchInput = document.getElementById('orderSearchInput');
+            const statusBtns = document.querySelectorAll('#orderStatusFilters .chip-btn');
+            const deliveryStaff = Store.getDeliveryStaff();
+
+            let activeStatus = 'All';
+            let searchQuery = '';
+
+            function renderOrders() {
+                let orders = Store.getOrders();
+
+                if (activeStatus !== 'All') {
+                    orders = orders.filter(o => o.status === activeStatus);
+                }
+
+                if (searchQuery) {
+                    orders = orders.filter(o => {
+                        const full = Store.getOrderById(o.order_id);
+                        const matchId = String(o.order_id).includes(searchQuery);
+                        const matchCust = full.customer.name?.toLowerCase().includes(searchQuery);
+                        return matchId || matchCust;
+                    });
+                }
+
+                if (orders.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
+                                No orders matching current filter criteria.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = orders.map(orderBasic => {
+                    const o = Store.getOrderById(orderBasic.order_id);
+                    return `
+                        <tr>
+                            <td>
+                                <strong style="color:var(--secondary); font-size:1.05rem;">#${o.order_id}</strong>
+                                <div style="font-size:0.75rem; color:var(--text-muted);">${o.order_date}</div>
+                            </td>
+                            <td>
+                                <strong style="color:var(--secondary);">${o.customer.name || 'Customer'}</strong>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">📞 ${o.customer.phone || 'N/A'}</div>
+                                <div style="font-size:0.78rem; color:var(--text-light); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${o.delivery_address}</div>
+                            </td>
+                            <td>
+                                <div style="font-size:0.85rem; line-height:1.4;">
+                                    ${o.items.map(i => `<div>${i.quantity}x ${i.name}</div>`).join('')}
+                                </div>
+                            </td>
+                            <td style="font-weight:800; font-size:1.1rem; color:var(--primary);">
+                                Rs. ${o.total_amount}
+                            </td>
+                            <td>
+                                <select onchange="handleAssignStaff(${o.order_id}, this.value)" class="input-control" style="padding:6px 10px; font-size:0.82rem; width:150px;">
+                                    <option value="">Unassigned</option>
+                                    ${deliveryStaff.map(s => `
+                                        <option value="${s.user_id}" ${o.delivery_boy_id === s.user_id ? 'selected' : ''}>
+                                            ${s.name}
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </td>
+                            <td>
+                                <select onchange="handleStatusChange(${o.order_id}, this.value)" class="input-control" style="padding:6px 10px; font-size:0.82rem; font-weight:700; width:140px; color:var(--secondary);">
+                                    <option value="Placed" ${o.status === 'Placed' ? 'selected' : ''}>Placed</option>
+                                    <option value="Preparing" ${o.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                                    <option value="Packed" ${o.status === 'Packed' ? 'selected' : ''}>Packed</option>
+                                    <option value="Out for Delivery" ${o.status === 'Out for Delivery' ? 'selected' : ''}>Out for Delivery</option>
+                                    <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </td>
+                            <td style="text-align:center;">
+                                <button onclick="viewOrderDetails(${o.order_id})" class="btn btn-outline btn-sm" title="View breakdown">
+                                    🔍 View
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            window.handleStatusChange = function(orderId, newStatus) {
+                Store.updateOrderStatus(orderId, newStatus);
+                App.showToast(`Order #${orderId} status changed to ${newStatus}.`, 'success');
+                renderOrders();
+            };
+
+            window.handleAssignStaff = function(orderId, staffId) {
+                Store.assignDeliveryPerson(orderId, staffId ? Number(staffId) : null);
+                App.showToast(`Updated courier assignment for Order #${orderId}.`, 'success');
+                renderOrders();
+            };
+
+            window.viewOrderDetails = function(orderId) {
+                const o = Store.getOrderById(orderId);
+                if (!o) return;
+
+                document.getElementById('modalOrderHeading').textContent = `Order Invoice #${o.order_id}`;
+                document.getElementById('modalOrderContent').innerHTML = `
+                    <div style="margin-bottom:18px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span>Customer Name:</span> <strong>${o.customer.name}</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span>Phone:</span> <strong>${o.customer.phone}</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span>Delivery Address:</span> <span>${o.delivery_address}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span>Payment Method:</span> <strong>${o.payment ? o.payment.mode : 'Online'}</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span>Transaction Ref:</span> <code>${o.payment ? o.payment.transaction_id : 'N/A'}</code>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size:0.95rem; margin-bottom:10px; color:var(--secondary);">Ordered Items:</h4>
+                    <div style="background:var(--bg-main); border-radius:var(--radius-sm); padding:12px; margin-bottom:16px;">
+                        ${o.items.map(i => `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.9rem;">
+                                <span><strong>${i.quantity}x</strong> ${i.name}</span>
+                                <span style="font-weight:600;">Rs. ${i.price * i.quantity}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; font-size:1.25rem; font-weight:800; color:var(--primary); border-top:1px dashed var(--border-color); padding-top:10px;">
+                        <span>Total Paid:</span>
+                        <span>Rs. ${o.total_amount}</span>
+                    </div>
+                `;
+                App.openModal('orderViewModal');
+            };
+
+            // Search input
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                renderOrders();
+            });
+
+            // Filter buttons
+            statusBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    statusBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeStatus = btn.getAttribute('data-status');
+                    renderOrders();
+                });
+            });
+
+            renderOrders();
+        });
+    </script>
+</body>
+</html>

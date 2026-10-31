@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Delivery Hub – SpiceRoute</title>
+    <meta name="description" content="Mobile-friendly portal for SpiceRoute delivery drivers to manage pickups and doorstep delivery fulfillment.">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚴</text></svg>">
+</head>
+<body style="background:#f1f5f9;">
+
+    <!-- Top Navigation -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon" style="background:var(--success);">🚴</div>
+                <span>Spice<span>Route</span> <small style="font-size:0.75rem; color:var(--success); font-weight:700; text-transform:uppercase; margin-left:4px;">Delivery</small></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="../hotel/index.html" class="btn btn-outline btn-sm">🏨 Hotel Kitchen</a>
+                <a href="../orders.html" class="btn btn-outline btn-sm">Customer View</a>
+                <span id="driverNameSlot" style="font-size:0.88rem; font-weight:600; color:var(--text-muted);">Courier</span>
+                <button onclick="App.handleLogout()" class="btn btn-outline btn-sm">Log Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Delivery Portal Body -->
+    <div class="container" style="max-width:720px; padding-top:24px; padding-bottom:60px;">
+        <div style="background:#fff; border-radius:var(--radius-lg); padding:20px; border:1px solid var(--border-color); margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1 style="font-size:1.4rem; color:var(--secondary); margin-bottom:2px;">Assigned Deliveries</h1>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">Active route dispatch orders</p>
+            </div>
+            <div style="text-align:right;">
+                <span style="font-size:0.78rem; text-transform:uppercase; color:var(--text-light); font-weight:700;">Status</span>
+                <div style="font-size:0.9rem; font-weight:700; color:var(--success);">● On Duty</div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="chip-btn active" id="tabActiveDeliveries">Active Shipments</button>
+            <button class="chip-btn" id="tabDeliveredDeliveries">Completed Deliveries</button>
+        </div>
+
+        <!-- Orders Cards Container -->
+        <div id="driverOrdersContainer" style="display:flex; flex-direction:column; gap:18px;">
+            <!-- Populated dynamically via JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyDeliveryState" style="display:none; text-align:center; padding:50px 20px; background:#fff; border-radius:var(--radius-lg); border:1px solid var(--border-color);">
+            <div style="font-size:3.5rem; margin-bottom:10px;">🛵</div>
+            <h3 style="font-size:1.25rem; color:var(--secondary); margin-bottom:4px;">No Assigned Tasks</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin:0;">All current food orders have been fulfilled.</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = Store.getCurrentUser();
+            if (!currentUser || currentUser.role !== 'delivery') {
+                window.location.replace('../login.html');
+                return;
+            }
+
+            document.getElementById('driverNameSlot').textContent = currentUser.name.split(' ')[0];
+
+            const container = document.getElementById('driverOrdersContainer');
+            const emptyState = document.getElementById('emptyDeliveryState');
+            const tabActive = document.getElementById('tabActiveDeliveries');
+            const tabCompleted = document.getElementById('tabDeliveredDeliveries');
+
+            let currentView = 'Active';
+
+            function renderDriverOrders() {
+                // Get orders assigned to this delivery courier
+                let orders = Store.getOrders({ delivery_boy_id: currentUser.user_id });
+
+                if (currentView === 'Active') {
+                    orders = orders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled');
+                } else {
+                    orders = orders.filter(o => o.status === 'Delivered');
+                }
+
+                if (orders.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+
+                container.innerHTML = orders.map(orderBasic => {
+                    const o = Store.getOrderById(orderBasic.order_id);
+                    const isPickedUp = o.status === 'Out for Delivery';
+                    const isDelivered = o.status === 'Delivered';
+
+                    return `
+                        <div class="panel-card" style="padding:22px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                                <div>
+                                    <strong style="font-size:1.15rem; color:var(--secondary);">Order #${o.order_id}</strong>
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">${o.order_date}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <span class="status-pill status-${o.status.toLowerCase().replace(/\s+/g, '-')}">
+                                        ${o.status}
+                                    </span>
+                                    <div style="font-size:1.15rem; font-weight:800; color:var(--primary); margin-top:4px;">
+                                        Rs. ${o.total_amount}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom:14px; font-size:0.92rem;">
+                                <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:6px;">
+                                    <span>👤</span>
+                                    <div>
+                                        <strong>${o.customer.name || 'Customer'}</strong>
+                                        <div style="color:var(--text-muted); font-size:0.85rem;">
+                                            <a href="tel:${o.customer.phone}" style="color:var(--info); font-weight:600;">📞 Call: ${o.customer.phone}</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:6px;">
+                                    <span>📍</span>
+                                    <div style="color:var(--secondary); font-weight:500;">
+                                        ${o.delivery_address}
+                                        <div style="font-size:0.8rem; color:var(--text-muted);">Pincode: ${o.pincode || '400018'}</div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-muted);">
+                                    <span>💵</span>
+                                    <span>Payment: <strong>${o.payment ? o.payment.mode : 'Online'} (${o.payment ? o.payment.payment_status : 'Pending'})</strong></span>
+                                </div>
+                            </div>
+
+                            <!-- Ordered items list -->
+                            <div style="background:var(--bg-main); padding:10px 14px; border-radius:var(--radius-sm); font-size:0.85rem; margin-bottom:16px;">
+                                <div style="font-weight:700; color:var(--text-muted); margin-bottom:4px; font-size:0.78rem; text-transform:uppercase;">
+                                    Package Contents:
+                                </div>
+                                ${o.items.map(i => `<div>• ${i.quantity}x ${i.name}</div>`).join('')}
+                            </div>
+
+                            <!-- Action Buttons -->
+                            ${!isDelivered ? `
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                    <button onclick="handleStatusAction(${o.order_id}, 'Out for Delivery')" 
+                                            class="btn btn-outline" 
+                                            ${isPickedUp ? 'disabled style="opacity:0.6;"' : ''}>
+                                        📦 ${isPickedUp ? 'In Transit' : 'Pick Up from Hotel'}
+                                    </button>
+                                    <button onclick="handleStatusAction(${o.order_id}, 'Delivered')" 
+                                            class="btn btn-success">
+                                        ✓ Delivered to Client
+                                    </button>
+                                </div>
+                            ` : `
+                                <div style="background:var(--success-light); color:var(--success); padding:10px; border-radius:var(--radius-sm); text-align:center; font-weight:700; font-size:0.9rem;">
+                                    ✓ Delivered Successfully
+                                </div>
+                            `}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            window.handleStatusAction = function(orderId, newStatus) {
+                Store.updateOrderStatus(orderId, newStatus, currentUser.user_id);
+                App.showToast(`Order #${orderId} marked as "${newStatus}".`, 'success');
+                renderDriverOrders();
+            };
+
+            tabActive.onclick = () => {
+                tabActive.classList.add('active');
+                tabCompleted.classList.remove('active');
+                currentView = 'Active';
+                renderDriverOrders();
+            };
+
+            tabCompleted.onclick = () => {
+                tabCompleted.classList.add('active');
+                tabActive.classList.remove('active');
+                currentView = 'Completed';
+                renderDriverOrders();
+            };
+
+            renderDriverOrders();
+            window.addEventListener('storeSynced', renderDriverOrders);
+        });
+    </script>
+</body>
+</html>

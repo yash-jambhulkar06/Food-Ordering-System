@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories – SpiceRoute Administration</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span> <small style="font-size:0.75rem; color:var(--primary); font-weight:700; text-transform:uppercase; margin-left:6px; letter-spacing:1px;">Admin</small></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="../index.html" class="btn btn-outline btn-sm">Customer View</a>
+                <button onclick="App.handleLogout()" class="btn btn-danger btn-sm">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Master Layout -->
+    <div class="admin-layout-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                Restaurant Hub
+            </div>
+            <ul class="admin-nav-links">
+                <li><a href="index.html" class="admin-nav-link"><span>📊</span> Dashboard</a></li>
+                <li><a href="menu.html" class="admin-nav-link"><span>🍽️</span> Menu Catalog</a></li>
+                <li><a href="categories.html" class="admin-nav-link active"><span>🏷️</span> Categories</a></li>
+                <li><a href="orders.html" class="admin-nav-link"><span>📦</span> Live Orders</a></li>
+                <li><a href="reports.html" class="admin-nav-link"><span>📈</span> Sales Analytics</a></li>
+                <li><a href="feedback.html" class="admin-nav-link"><span>⭐</span> Guest Reviews</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="admin-content-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+                <div>
+                    <h1 style="font-size:2rem; color:var(--secondary); margin-bottom:4px;">Category Classification</h1>
+                    <p style="color:var(--text-muted); font-size:0.92rem;">Organize kitchen catalog sections and customer browsing filters.</p>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1.6fr; gap:28px; align-items:start;">
+                <!-- Add Category Form Card -->
+                <div class="panel-card">
+                    <h2 style="font-size:1.2rem; margin-bottom:16px;">Add New Category</h2>
+                    <form id="addCategoryForm">
+                        <div class="form-field">
+                            <label for="catNameInput" class="field-label">Category Name *</label>
+                            <input type="text" id="catNameInput" class="input-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            + Create Category
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Categories Table Card -->
+                <div class="panel-card" style="padding:0; overflow:hidden;">
+                    <div class="data-table-wrap" style="border:none;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Category Title</th>
+                                    <th style="text-align:center;">Assigned Items</th>
+                                    <th style="text-align:right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoryTbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tbody = document.getElementById('categoryTbody');
+            const form = document.getElementById('addCategoryForm');
+            const input = document.getElementById('catNameInput');
+
+            function renderCategories() {
+                const cats = Store.getCategories();
+                const menu = Store.getMenu();
+
+                tbody.innerHTML = cats.map(cat => {
+                    const itemCount = menu.filter(m => m.category.toLowerCase() === cat.toLowerCase()).length;
+                    return `
+                        <tr>
+                            <td>
+                                <strong style="font-size:1rem; color:var(--secondary);">${cat}</strong>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="background:var(--bg-main); padding:4px 12px; border-radius:12px; font-weight:700; color:var(--primary); font-size:0.85rem;">
+                                    ${itemCount} dishes
+                                </span>
+                            </td>
+                            <td style="text-align:right;">
+                                <button onclick="deleteCat('${cat.replace(/'/g, "\\'")}')" class="btn btn-danger btn-sm" title="Delete category">
+                                    🗑️ Remove
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = input.value.trim();
+                const result = Store.saveCategory(name);
+
+                if (result.success) {
+                    App.showToast(`Category "${name}" created!`, 'success');
+                    input.value = '';
+                    renderCategories();
+                } else {
+                    App.showToast(result.message || 'Could not add category.', 'error');
+                }
+            });
+
+            window.deleteCat = function(name) {
+                if (confirm(`Are you sure you want to delete the category "${name}"?`)) {
+                    Store.deleteCategory(name);
+                    App.showToast(`Deleted category "${name}".`, 'info');
+                    renderCategories();
+                }
+            };
+
+            renderCategories();
+        });
+    </script>
+</body>
+</html>

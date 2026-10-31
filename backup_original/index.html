@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpiceRoute – Online Food Ordering System | Authentic Gourmet Delights</title>
+    <meta name="description" content="Experience authentic Indian cuisine, stone-baked pizzas, and refreshing beverages delivered fresh to your doorstep with SpiceRoute.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span></span>
+            </a>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link active">Home</a></li>
+                <li><a href="menu.html" class="nav-link">Menu</a></li>
+                <li><a href="orders.html" class="nav-link">My Orders</a></li>
+                <li><a href="hotel/index.html" class="nav-link" style="color:#d97706; font-weight:700;">🏨 Hotel Panel</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="cart.html" class="cart-btn-link" title="Shopping Cart">
+                    <span>🛒 Cart</span>
+                    <span class="cart-badge-count" id="navCartBadge">0</span>
+                </a>
+                <div id="navUserSlot" style="display:flex; align-items:center; gap:12px;"></div>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">&#9776;</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-grid">
+                <div>
+                    <div class="hero-pill">
+                        <span>🔥</span> Handcrafted With Royal Spices
+                    </div>
+                    <h1 class="hero-title">
+                        Authentic Indian Flavours, <span>Delivered Piping Hot.</span>
+                    </h1>
+                    <p class="hero-desc">
+                        From fragrant dum biryanis to oven-baked paneer pizzas, savor handcrafted dishes cooked with traditional spices and delivered straight to your doorstep within 30 minutes.
+                    </p>
+                    <div class="hero-btns">
+                        <a href="menu.html" class="btn btn-primary btn-lg">Explore Full Menu</a>
+                        <a href="#popularDishes" class="btn btn-outline btn-lg">Chef's Specials</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <h3>25+</h3>
+                            <p>Signature Dishes</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>30 Mins</h3>
+                            <p>Average Delivery</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>4.9 ★</h3>
+                            <p>Customer Rating</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-visual">
+                    <img src="assets/images/paneer-pizza.jpg" alt="Paneer Pizza Special" class="hero-img" onerror="App.handleImageError(this)">
+                    <div class="hero-floating-card">
+                        <div class="floating-icon">🚀</div>
+                        <div>
+                            <h4 style="font-size:0.95rem; font-weight:700;">Express Delivery</h4>
+                            <p style="font-size:0.8rem; color:var(--text-muted);">Hot & Fresh Guaranteed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Chips Quick Navigation -->
+    <section style="padding: 24px 0; background:#fff; border-bottom: 1px solid var(--border-color);">
+        <div class="container">
+            <div class="category-chips-bar" id="categoryChipsContainer">
+                <a href="menu.html?cat=All" class="chip-btn active">All Items</a>
+                <a href="menu.html?cat=Starters" class="chip-btn">Starters</a>
+                <a href="menu.html?cat=Main+Course" class="chip-btn">Main Course</a>
+                <a href="menu.html?cat=Pizza+and+Burgers" class="chip-btn">Pizza and Burgers</a>
+                <a href="menu.html?cat=Beverages" class="chip-btn">Beverages</a>
+                <a href="menu.html?cat=Desserts" class="chip-btn">Desserts</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Dishes Section -->
+    <section class="section" id="popularDishes" style="padding: 60px 0;">
+        <div class="container">
+            <div style="text-align:center; max-width:620px; margin:0 auto 40px;">
+                <span style="color:var(--primary); font-weight:700; text-transform:uppercase; font-size:0.85rem; letter-spacing:1px;">Signature Creations</span>
+                <h2 style="font-size:2.2rem; margin-top:6px;">Most Loved Dishes</h2>
+                <p style="color:var(--text-muted); font-size:0.95rem;">Carefully curated dishes loved by thousands of food enthusiasts across the city.</p>
+            </div>
+
+            <div class="food-cards-grid" id="featuredDishesGrid">
+                <!-- Injected via JavaScript -->
+            </div>
+
+            <div style="text-align:center; margin-top:40px;">
+                <a href="menu.html" class="btn btn-outline btn-lg">View Complete 25-Dish Menu &rarr;</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose SpiceRoute -->
+    <section style="padding: 60px 0; background:#fff; border-top:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
+        <div class="container">
+            <div style="text-align:center; max-width:620px; margin:0 auto 48px;">
+                <span style="color:var(--primary); font-weight:700; text-transform:uppercase; font-size:0.85rem; letter-spacing:1px;">Our Commitment</span>
+                <h2 style="font-size:2.2rem; margin-top:6px;">Why Dine With SpiceRoute?</h2>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:30px;">
+                <div class="panel-card" style="text-align:center; padding:32px 24px;">
+                    <div style="width:60px; height:60px; background:var(--primary-light); color:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 18px;">👨‍🍳</div>
+                    <h3 style="font-size:1.2rem; margin-bottom:10px;">Master Culinary Chefs</h3>
+                    <p style="font-size:0.9rem; color:var(--text-muted);">Decades of culinary mastery delivering time-honored authentic recipes prepared fresh daily.</p>
+                </div>
+
+                <div class="panel-card" style="text-align:center; padding:32px 24px;">
+                    <div style="width:60px; height:60px; background:var(--success-light); color:var(--success); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 18px;">🌱</div>
+                    <h3 style="font-size:1.2rem; margin-bottom:10px;">Farm Fresh Produce</h3>
+                    <p style="font-size:0.9rem; color:var(--text-muted);">Sourced strictly from certified organic growers, pure whole spices, and dairy-fresh cottage cheese.</p>
+                </div>
+
+                <div class="panel-card" style="text-align:center; padding:32px 24px;">
+                    <div style="width:60px; height:60px; background:var(--info-light); color:var(--info); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 18px;">📦</div>
+                    <h3 style="font-size:1.2rem; margin-bottom:10px;">Insulated Tamper Packaging</h3>
+                    <p style="font-size:0.9rem; color:var(--text-muted);">Food-grade heat-retaining containers ensuring your meals arrive piping hot and intact.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer Reviews -->
+    <section class="section" style="padding: 60px 0;">
+        <div class="container">
+            <div style="text-align:center; max-width:620px; margin:0 auto 40px;">
+                <span style="color:var(--primary); font-weight:700; text-transform:uppercase; font-size:0.85rem; letter-spacing:1px;">Guest Experiences</span>
+                <h2 style="font-size:2.2rem; margin-top:6px;">Loved by Gourmet Foodies</h2>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px;" id="homeFeedbackGrid">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Comprehensive Footer -->
+    <footer class="footer-wrap">
+        <div class="container">
+            <div class="footer-columns">
+                <div class="footer-col">
+                    <h3 style="font-size:1.5rem; display:flex; align-items:center; gap:8px;">
+                        <span>🍛</span> SpiceRoute
+                    </h3>
+                    <p style="font-size:0.92rem; line-height:1.6; margin-bottom:16px;">
+                        SpiceRoute is an authentic culinary establishment serving signature North Indian specialties, stone-baked pizzas, and artisan desserts.
+                    </p>
+                    <p style="font-size:0.85rem; color:#cbd5e1;">
+                        📍 Central Kitchen: Bandra West, Mumbai, MH - 400050<br>
+                        📞 Order Hotline: +91 98201 54321<br>
+                        ✉️ Orders: care@spiceroute.in
+                    </p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="menu.html">Explore Menu</a></li>
+                        <li><a href="cart.html">View Cart</a></li>
+                        <li><a href="orders.html">Track Order</a></li>
+                        <li><a href="profile.html">My Account</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Menu Sections</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="menu.html?cat=Starters">Tandoori Starters</a></li>
+                        <li><a href="menu.html?cat=Main+Course">Royal Main Course</a></li>
+                        <li><a href="menu.html?cat=Pizza+and+Burgers">Woodfired Pizzas</a></li>
+                        <li><a href="menu.html?cat=Beverages">Cool Beverages</a></li>
+                        <li><a href="menu.html?cat=Desserts">Artisan Desserts</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Restaurant Policies</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="#about">About Our Kitchen</a></li>
+                        <li><a href="#privacy">Privacy Policy</a></li>
+                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="#contact">Contact & Support</a></li>
+                        <li><a href="login.html">Staff Login</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-copyright">
+                <p>&copy; 2026 SpiceRoute Restaurant Private Limited. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Service Layer & UI Scripts -->
+    <script src="js/store.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            function renderAll() {
+                // 1. Dynamic category chips
+                const cats = Store.getCategories();
+                const chipsContainer = document.getElementById('categoryChipsContainer');
+                if (chipsContainer && cats.length > 0) {
+                    chipsContainer.innerHTML = `
+                        <a href="menu.html?cat=All" class="chip-btn active">All Items</a>
+                        ${cats.map(c => `<a href="menu.html?cat=${encodeURIComponent(c)}" class="chip-btn">${c}</a>`).join('')}
+                    `;
+                }
+
+                // 2. Dynamic dishes count in hero
+                const menu = Store.getMenu();
+                const statsElem = document.querySelector('.hero-stats .stat-item h3');
+                if (statsElem) {
+                    statsElem.textContent = `${menu.length}+`;
+                }
+
+                // 3. Render Featured Dishes dynamically
+                const grid = document.getElementById('featuredDishesGrid');
+                if (grid) {
+                    const featuredIds = [11, 17, 6, 7, 9, 22];
+                    const featuredDishes = menu.filter(item => featuredIds.includes(item.item_id));
+                    const displayDishes = featuredDishes.length >= 4 ? featuredDishes : menu.slice(0, 6);
+
+                    grid.innerHTML = displayDishes.map(dish => `
+                        <div class="dish-card">
+                            <div class="dish-img-wrap">
+                                <img src="${dish.image}" alt="${dish.name}" class="dish-img" onerror="App.handleImageError(this)">
+                                <span class="dish-badge-category">${dish.category}</span>
+                                <span class="dish-badge-status ${dish.availability ? 'available' : 'soldout'}">
+                                    ${dish.availability ? 'Available' : 'Sold Out'}
+                                </span>
+                            </div>
+                            <div class="dish-content">
+                                <h3 class="dish-title">${dish.name}</h3>
+                                <p class="dish-desc">${dish.description}</p>
+                                <div class="dish-footer">
+                                    <span class="dish-price">Rs. ${dish.price}</span>
+                                    ${dish.availability ? `
+                                        <button onclick="App.handleAddToCart(${dish.item_id}, '${dish.name.replace(/'/g, "\\'")}', ${dish.price})" class="btn btn-primary btn-sm">
+                                            + Add to Cart
+                                        </button>
+                                    ` : `
+                                        <button class="btn btn-outline btn-sm" disabled style="opacity:0.6; cursor:not-allowed;">Sold Out</button>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                // 4. Render Customer Feedback dynamically
+                const feedbackList = Store.getFeedback().slice(0, 3);
+                const feedbackGrid = document.getElementById('homeFeedbackGrid');
+                if (feedbackGrid) {
+                    feedbackGrid.innerHTML = feedbackList.map(f => `
+                        <div class="panel-card" style="padding:24px;">
+                            <div style="color:var(--accent-gold); font-size:1.15rem; margin-bottom:8px;">
+                                ${'★'.repeat(f.rating)}${'☆'.repeat(5 - f.rating)}
+                            </div>
+                            <p style="font-size:0.92rem; color:var(--text-main); font-style:italic; margin-bottom:14px; line-height:1.5;">
+                                "${f.comment}"
+                            </p>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; color:var(--text-muted); border-top:1px dashed var(--border-color); padding-top:10px;">
+                                <strong>${f.user_name}</strong>
+                                <span>Order #${f.order_id}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            renderAll();
+            window.addEventListener('storeSynced', renderAll);
+        });
+    </script>
+</body>
+</html>

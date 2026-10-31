@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Operations Dashboard – SpiceRoute Administration</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span> <small style="font-size:0.75rem; color:var(--primary); font-weight:700; text-transform:uppercase; margin-left:6px; letter-spacing:1px;">Admin</small></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="../index.html" class="btn btn-outline btn-sm">Customer View</a>
+                <button onclick="App.handleLogout()" class="btn btn-danger btn-sm">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Master Layout -->
+    <div class="admin-layout-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                Restaurant Hub
+            </div>
+            <ul class="admin-nav-links">
+                <li><a href="index.html" class="admin-nav-link active"><span>📊</span> Dashboard</a></li>
+                <li><a href="menu.html" class="admin-nav-link"><span>🍽️</span> Menu Catalog</a></li>
+                <li><a href="categories.html" class="admin-nav-link"><span>🏷️</span> Categories</a></li>
+                <li><a href="orders.html" class="admin-nav-link"><span>📦</span> Live Orders</a></li>
+                <li><a href="../hotel/index.html" class="admin-nav-link" style="color:#d97706; font-weight:700;"><span>🏨</span> Hotel Kitchen (KDS)</a></li>
+                <li><a href="reports.html" class="admin-nav-link"><span>📈</span> Sales Analytics</a></li>
+                <li><a href="feedback.html" class="admin-nav-link"><span>⭐</span> Guest Reviews</a></li>
+            </ul>
+            <div style="padding:16px 20px; font-size:0.8rem; color:#64748b; border-top:1px solid rgba(255,255,255,0.06);">
+                Logged in as <strong>Administrator</strong>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="admin-content-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+                <div>
+                    <h1 style="font-size:2rem; color:var(--secondary); margin-bottom:4px;">Executive Dashboard</h1>
+                    <p style="color:var(--text-muted); font-size:0.92rem;">Real-time restaurant kitchen metrics and sales breakdown.</p>
+                </div>
+                <a href="orders.html" class="btn btn-primary btn-sm">
+                    Manage Orders &rarr;
+                </a>
+            </div>
+
+            <!-- KPI Metric Cards -->
+            <div class="kpi-cards-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon coral">📦</div>
+                    <div class="kpi-info">
+                        <h4>Today's Orders</h4>
+                        <div class="kpi-num" id="kpiTodayOrders">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon green">💰</div>
+                    <div class="kpi-info">
+                        <h4>Total Revenue</h4>
+                        <div class="kpi-num" id="kpiRevenue">Rs. 0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon gold">⏳</div>
+                    <div class="kpi-info">
+                        <h4>Pending Orders</h4>
+                        <div class="kpi-num" id="kpiPending">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon blue">👥</div>
+                    <div class="kpi-info">
+                        <h4>Active Customers</h4>
+                        <div class="kpi-num" id="kpiCustomers">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Trend Chart -->
+            <div class="panel-card" style="margin-bottom:30px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div>
+                        <h2 style="font-size:1.25rem; margin:0;">Daily Sales Trajectory (Last 7 Days)</h2>
+                        <span style="font-size:0.85rem; color:var(--text-muted);">Cumulative order value in INR</span>
+                    </div>
+                    <span style="font-size:0.85rem; background:var(--primary-light); color:var(--primary); font-weight:700; padding:4px 10px; border-radius:6px;">
+                        Live Analytics
+                    </span>
+                </div>
+
+                <!-- Responsive SVG Chart -->
+                <div style="width:100%; height:240px; position:relative;" id="chartContainer">
+                    <svg viewBox="0 0 700 220" style="width:100%; height:100%; overflow:visible;" id="salesSvgChart">
+                        <!-- Chart generated via JavaScript -->
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Two Column Row: Top Selling Dishes & Recent Orders -->
+            <div style="display:grid; grid-template-columns:1fr 1.15fr; gap:28px;">
+                <!-- Top Selling Dishes -->
+                <div class="panel-card">
+                    <h2 style="font-size:1.25rem; margin-bottom:16px;">Top-Selling Items</h2>
+                    <div class="data-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Dish</th>
+                                    <th>Category</th>
+                                    <th style="text-align:right;">Orders</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topItemsTbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Order Feed -->
+                <div class="panel-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h2 style="font-size:1.25rem; margin:0;">Recent Orders</h2>
+                        <a href="orders.html" style="font-size:0.85rem; color:var(--primary); font-weight:700;">View All</a>
+                    </div>
+                    <div class="data-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentOrdersTbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        function renderDashboard() {
+            const orders = Store.getOrders();
+            const customers = Store.getUsers('customer');
+
+            // Today's date string YYYY-MM-DD
+            const now = new Date();
+            const todayStr = now.getFullYear() + '-' +
+                String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                String(now.getDate()).padStart(2, '0');
+
+            const todayOrders = orders.filter(o => o.order_date.startsWith(todayStr));
+            const totalRevenue = orders.reduce((sum, o) => sum + o.total_amount, 0);
+            const pendingOrders = orders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled');
+
+            const kpiToday = document.getElementById('kpiTodayOrders');
+            const kpiRev = document.getElementById('kpiRevenue');
+            const kpiPend = document.getElementById('kpiPending');
+            const kpiCust = document.getElementById('kpiCustomers');
+
+            if (kpiToday) kpiToday.textContent = todayOrders.length;
+            if (kpiRev) kpiRev.textContent = 'Rs. ' + totalRevenue.toLocaleString('en-IN');
+            if (kpiPend) kpiPend.textContent = pendingOrders.length;
+            if (kpiCust) kpiCust.textContent = customers.length;
+
+            // Render Recent Orders (Top 5)
+            const recentTbody = document.getElementById('recentOrdersTbody');
+            if (recentTbody) {
+                recentTbody.innerHTML = orders.slice(0, 5).map(o => {
+                    const fullOrder = Store.getOrderById(o.order_id);
+                    return `
+                        <tr>
+                            <td>
+                                <strong style="color:var(--secondary);">#${o.order_id}</strong>
+                                <div style="font-size:0.75rem; color:var(--text-muted);">${o.order_date.split(' ')[1] || ''}</div>
+                            </td>
+                            <td>${(fullOrder && fullOrder.customer && fullOrder.customer.name) || 'Customer'}</td>
+                            <td style="font-weight:700; color:var(--primary);">Rs. ${o.total_amount}</td>
+                            <td>
+                                <span class="status-pill status-${o.status.toLowerCase().replace(/\s+/g, '-')}">
+                                    ${o.status}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Calculate Top Selling Items
+            const orderItems = JSON.parse(localStorage.getItem('spiceroute_order_items')) || [];
+            const menu = Store.getMenu();
+            const counts = {};
+            orderItems.forEach(oi => {
+                counts[oi.item_id] = (counts[oi.item_id] || 0) + oi.quantity;
+            });
+
+            const sortedItems = Object.keys(counts)
+                .map(id => {
+                    const dish = menu.find(m => m.item_id === Number(id)) || {};
+                    return {
+                        id: Number(id),
+                        name: dish.name || 'Gourmet Dish',
+                        category: dish.category || 'Special',
+                        count: counts[id]
+                    };
+                })
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+
+            const topItemsEl = document.getElementById('topItemsTbody');
+            if (topItemsEl) {
+                topItemsEl.innerHTML = sortedItems.map(item => `
+                    <tr>
+                        <td><strong>${item.name}</strong></td>
+                        <td><span style="font-size:0.82rem; color:var(--text-muted);">${item.category}</span></td>
+                        <td style="text-align:right; font-weight:700; color:var(--primary);">${item.count} qty</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render SVG Sales Trend Chart (7 days)
+            const svgChart = document.getElementById('salesSvgChart');
+            if (!svgChart) return;
+
+            const dayLabels = [];
+            const dayTotals = [];
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dStr = d.getFullYear() + '-' +
+                    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(d.getDate()).padStart(2, '0');
+                const label = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                dayLabels.push(label);
+
+                const daySum = orders
+                    .filter(o => o.order_date && o.order_date.startsWith(dStr))
+                    .reduce((sum, o) => sum + o.total_amount, 0);
+                dayTotals.push(daySum);
+            }
+
+            const maxVal = Math.max(...dayTotals, 1000);
+            const chartW = 700;
+            const barW = 48;
+            const step = chartW / 7;
+
+            let chartHtml = `
+                <!-- Background Gridlines -->
+                <line x1="0" y1="180" x2="700" y2="180" stroke="#e2e8f0" stroke-width="1.5" />
+                <line x1="0" y1="90" x2="700" y2="90" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4" />
+                <line x1="0" y1="10" x2="700" y2="10" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4" />
+            `;
+
+            dayTotals.forEach((val, idx) => {
+                const barHeight = (val / maxVal) * 150;
+                const x = idx * step + (step - barW) / 2;
+                const y = 180 - barHeight;
+
+                chartHtml += `
+                    <g>
+                        <!-- Bar -->
+                        <rect x="${x}" y="${y}" width="${barW}" height="${barHeight}" rx="6" fill="url(#coralGrad)" opacity="0.9" />
+                        <!-- Value Label -->
+                        <text x="${x + barW/2}" y="${y - 8}" text-anchor="middle" font-size="11" font-weight="700" fill="#e23744">
+                            Rs. ${val}
+                        </text>
+                        <!-- Date Label -->
+                        <text x="${x + barW/2}" y="202" text-anchor="middle" font-size="11" fill="#64748b" font-weight="500">
+                            ${dayLabels[idx].split(',')[0]}
+                        </text>
+                    </g>
+                `;
+            });
+
+            // Linear Gradient Def
+            chartHtml = `
+                <defs>
+                    <linearGradient id="coralGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#e23744" />
+                        <stop offset="100%" stop-color="#ff7a00" />
+                    </linearGradient>
+                </defs>
+            ` + chartHtml;
+
+            svgChart.innerHTML = chartHtml;
+        }
+
+        document.addEventListener('DOMContentLoaded', renderDashboard);
+        window.addEventListener('storeSynced', renderDashboard);
+    </script>
+</body>
+</html>

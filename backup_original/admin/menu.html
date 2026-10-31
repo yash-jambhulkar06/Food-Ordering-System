@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Menu Catalog – SpiceRoute Administration</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span> <small style="font-size:0.75rem; color:var(--primary); font-weight:700; text-transform:uppercase; margin-left:6px; letter-spacing:1px;">Admin</small></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="../index.html" class="btn btn-outline btn-sm">Customer View</a>
+                <button onclick="App.handleLogout()" class="btn btn-danger btn-sm">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Master Layout -->
+    <div class="admin-layout-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                Restaurant Hub
+            </div>
+            <ul class="admin-nav-links">
+                <li><a href="index.html" class="admin-nav-link"><span>📊</span> Dashboard</a></li>
+                <li><a href="menu.html" class="admin-nav-link active"><span>🍽️</span> Menu Catalog</a></li>
+                <li><a href="categories.html" class="admin-nav-link"><span>🏷️</span> Categories</a></li>
+                <li><a href="orders.html" class="admin-nav-link"><span>📦</span> Live Orders</a></li>
+                <li><a href="reports.html" class="admin-nav-link"><span>📈</span> Sales Analytics</a></li>
+                <li><a href="feedback.html" class="admin-nav-link"><span>⭐</span> Guest Reviews</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="admin-content-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+                <div>
+                    <h1 style="font-size:2rem; color:var(--secondary); margin-bottom:4px;">Menu Catalog Management</h1>
+                    <p style="color:var(--text-muted); font-size:0.92rem;">Add new delicacies, modify pricing, or toggle kitchen availability.</p>
+                </div>
+                <button onclick="openAddDishModal()" class="btn btn-primary">
+                    + Add New Food Item
+                </button>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <div style="background:#fff; padding:16px 20px; border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                <div style="flex:1; min-width:240px; position:relative;">
+                    <input type="text" id="adminDishSearch" class="input-control" aria-label="Search dishes" title="Type to search items">
+                </div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <label for="adminCatFilter" style="font-size:0.88rem; font-weight:600; color:var(--text-muted);">Category:</label>
+                    <select id="adminCatFilter" class="input-control" style="width:auto; padding:8px 14px;">
+                        <option value="All">All Categories</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Catalog Table -->
+            <div class="panel-card" style="padding:0; overflow:hidden;">
+                <div class="data-table-wrap" style="border:none;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Description</th>
+                                <th style="text-align:center;">Availability</th>
+                                <th style="text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminMenuTbody">
+                            <!-- Populated dynamically via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Food Item Modal -->
+    <div id="dishModal" class="modal-backdrop">
+        <div class="modal-window">
+            <div class="modal-head">
+                <h3 id="modalDishTitle">Add New Food Item</h3>
+                <button class="modal-dismiss" onclick="App.closeModal('dishModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="dishForm">
+                    <input type="hidden" id="dishItemId">
+
+                    <div class="form-field">
+                        <label for="dishName" class="field-label">Dish Name *</label>
+                        <input type="text" id="dishName" class="input-control" required>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="form-field">
+                            <label for="dishCategory" class="field-label">Category *</label>
+                            <select id="dishCategory" class="input-control" required>
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="dishPrice" class="field-label">Price in INR (Rs.) *</label>
+                            <input type="number" id="dishPrice" class="input-control" step="1" min="10" required>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="dishDesc" class="field-label">Culinary Description *</label>
+                        <textarea id="dishDesc" class="input-control" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="dishImage" class="field-label">Image URL *</label>
+                        <input type="url" id="dishImage" class="input-control" required>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="setPresetImg('assets/images/paneer-pizza.jpg')">Paneer Pizza</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="setPresetImg('assets/images/cold-drink.jpg')">Cold Drink</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="setPresetImg('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80')">Burger</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="setPresetImg('https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80')">Biryani</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="setPresetImg('https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&q=80')">Dessert</button>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">Kitchen Availability</label>
+                        <div style="display:flex; gap:16px;">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="radio" name="dishAvailability" value="1" checked> Available
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="radio" name="dishAvailability" value="0"> Sold Out
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+                        <button type="button" class="btn btn-outline" onclick="App.closeModal('dishModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Dish</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tbody = document.getElementById('adminMenuTbody');
+            const searchInput = document.getElementById('adminDishSearch');
+            const catFilter = document.getElementById('adminCatFilter');
+            const catSelectModal = document.getElementById('dishCategory');
+
+            let searchQuery = '';
+            let selectedCategory = 'All';
+
+            // Populate category select options
+            function loadCategoryOptions() {
+                const cats = Store.getCategories();
+                catFilter.innerHTML = '<option value="All">All Categories</option>' + 
+                    cats.map(c => `<option value="${c}">${c}</option>`).join('');
+                
+                catSelectModal.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            }
+
+            function renderAdminMenu() {
+                let items = Store.getMenu();
+
+                if (selectedCategory !== 'All') {
+                    items = items.filter(i => i.category === selectedCategory);
+                }
+
+                if (searchQuery) {
+                    items = items.filter(i => 
+                        i.name.toLowerCase().includes(searchQuery) || 
+                        i.description.toLowerCase().includes(searchQuery)
+                    );
+                }
+
+                tbody.innerHTML = items.map(dish => `
+                    <tr>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <img src="${dish.image}" alt="${dish.name}" style="width:48px; height:48px; border-radius:8px; object-fit:cover;" onerror="App.handleImageError(this)">
+                                <div>
+                                    <strong style="color:var(--secondary); font-size:0.95rem;">${dish.name}</strong>
+                                    <div style="font-size:0.75rem; color:var(--text-muted);">ID: #${dish.item_id}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span style="background:var(--bg-main); padding:4px 10px; border-radius:6px; font-size:0.82rem; font-weight:600;">
+                                ${dish.category}
+                            </span>
+                        </td>
+                        <td style="font-weight:700; color:var(--primary); font-size:1.05rem;">
+                            Rs. ${dish.price}
+                        </td>
+                        <td style="max-width:240px; font-size:0.85rem; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            ${dish.description}
+                        </td>
+                        <td style="text-align:center;">
+                            <button onclick="toggleAvailability(${dish.item_id}, ${dish.availability})" class="status-pill ${dish.availability ? 'status-delivered' : 'status-cancelled'}" style="cursor:pointer; border:none;">
+                                ${dish.availability ? 'Available' : 'Sold Out'}
+                            </button>
+                        </td>
+                        <td style="text-align:center; white-space:nowrap;">
+                            <button onclick="openEditDishModal(${dish.item_id})" class="btn btn-outline btn-sm" style="margin-right:6px;" title="Edit details">
+                                ✏️ Edit
+                            </button>
+                            <button onclick="handleDeleteDish(${dish.item_id})" class="btn btn-danger btn-sm" title="Delete from catalog">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                renderAdminMenu();
+            });
+
+            catFilter.addEventListener('change', (e) => {
+                selectedCategory = e.target.value;
+                renderAdminMenu();
+            });
+
+            window.setPresetImg = function(url) {
+                document.getElementById('dishImage').value = url;
+            };
+
+            window.toggleAvailability = function(itemId, currentVal) {
+                const item = Store.getMenuItemById(itemId);
+                if (item) {
+                    item.availability = currentVal ? 0 : 1;
+                    Store.saveMenuItem(item);
+                    App.showToast(`Updated ${item.name} availability.`, 'success');
+                    renderAdminMenu();
+                }
+            };
+
+            window.openAddDishModal = function() {
+                document.getElementById('modalDishTitle').textContent = 'Add New Food Item';
+                document.getElementById('dishItemId').value = '';
+                document.getElementById('dishName').value = '';
+                document.getElementById('dishPrice').value = '';
+                document.getElementById('dishDesc').value = '';
+                document.getElementById('dishImage').value = 'assets/images/paneer-pizza.jpg';
+                document.querySelector('input[name="dishAvailability"][value="1"]').checked = true;
+                App.openModal('dishModal');
+            };
+
+            window.openEditDishModal = function(itemId) {
+                const dish = Store.getMenuItemById(itemId);
+                if (!dish) return;
+
+                document.getElementById('modalDishTitle').textContent = 'Edit Food Item #' + dish.item_id;
+                document.getElementById('dishItemId').value = dish.item_id;
+                document.getElementById('dishName').value = dish.name;
+                document.getElementById('dishCategory').value = dish.category;
+                document.getElementById('dishPrice').value = dish.price;
+                document.getElementById('dishDesc').value = dish.description;
+                document.getElementById('dishImage').value = dish.image;
+                document.querySelector(`input[name="dishAvailability"][value="${dish.availability}"]`).checked = true;
+                App.openModal('dishModal');
+            };
+
+            window.handleDeleteDish = function(itemId) {
+                if (confirm('Are you sure you want to remove this dish from the menu?')) {
+                    Store.deleteMenuItem(itemId);
+                    App.showToast('Item deleted successfully.', 'info');
+                    renderAdminMenu();
+                }
+            };
+
+            // Form Submit
+            const form = document.getElementById('dishForm');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const id = document.getElementById('dishItemId').value;
+                const name = document.getElementById('dishName').value;
+                const category = document.getElementById('dishCategory').value;
+                const price = document.getElementById('dishPrice').value;
+                const desc = document.getElementById('dishDesc').value;
+                const image = document.getElementById('dishImage').value;
+                const availability = document.querySelector('input[name="dishAvailability"]:checked').value;
+
+                const result = Store.saveMenuItem({
+                    item_id: id ? Number(id) : null,
+                    name: name,
+                    category: category,
+                    price: price,
+                    description: desc,
+                    image: image,
+                    availability: availability
+                });
+
+                if (result.success) {
+                    App.closeModal('dishModal');
+                    App.showToast(`Saved ${name} successfully!`, 'success');
+                    renderAdminMenu();
+                } else {
+                    App.showToast(result.message || 'Could not save item.', 'error');
+                }
+            });
+
+            // Initial setup
+            loadCategoryOptions();
+            renderAdminMenu();
+        });
+    </script>
+</body>
+</html>

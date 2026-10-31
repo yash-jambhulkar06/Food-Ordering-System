@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Analytics & Financial Reports – SpiceRoute</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span> <small style="font-size:0.75rem; color:var(--primary); font-weight:700; text-transform:uppercase; margin-left:6px; letter-spacing:1px;">Admin</small></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="../index.html" class="btn btn-outline btn-sm">Customer View</a>
+                <button onclick="App.handleLogout()" class="btn btn-danger btn-sm">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Master Layout -->
+    <div class="admin-layout-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                Restaurant Hub
+            </div>
+            <ul class="admin-nav-links">
+                <li><a href="index.html" class="admin-nav-link"><span>📊</span> Dashboard</a></li>
+                <li><a href="menu.html" class="admin-nav-link"><span>🍽️</span> Menu Catalog</a></li>
+                <li><a href="categories.html" class="admin-nav-link"><span>🏷️</span> Categories</a></li>
+                <li><a href="orders.html" class="admin-nav-link"><span>📦</span> Live Orders</a></li>
+                <li><a href="reports.html" class="admin-nav-link active"><span>📈</span> Sales Analytics</a></li>
+                <li><a href="feedback.html" class="admin-nav-link"><span>⭐</span> Guest Reviews</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="admin-content-area">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+                <div>
+                    <h1 style="font-size:2rem; color:var(--secondary); margin-bottom:4px;">Sales Reports & Financials</h1>
+                    <p style="color:var(--text-muted); font-size:0.92rem;">Filter ledger entries by dates and export CSV balance sheets.</p>
+                </div>
+                <button id="downloadCsvBtn" class="btn btn-primary">
+                    📥 Download CSV Report
+                </button>
+            </div>
+
+            <!-- Date Range Controls -->
+            <div class="panel-card" style="margin-bottom:28px; padding:22px 28px;">
+                <div style="display:flex; align-items:flex-end; gap:20px; flex-wrap:wrap;">
+                    <div class="form-field" style="margin:0;">
+                        <label for="reportStartDate" class="field-label">From Date</label>
+                        <input type="date" id="reportStartDate" class="input-control" style="width:180px;">
+                    </div>
+                    <div class="form-field" style="margin:0;">
+                        <label for="reportEndDate" class="field-label">To Date</label>
+                        <input type="date" id="reportEndDate" class="input-control" style="width:180px;">
+                    </div>
+                    <button id="applyDateFilterBtn" class="btn btn-secondary">
+                        Filter Data
+                    </button>
+                    <button id="resetDateFilterBtn" class="btn btn-outline">
+                        All Time
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary KPI Grid -->
+            <div class="kpi-cards-grid" style="margin-bottom:28px;">
+                <div class="kpi-card">
+                    <div class="kpi-icon green">💵</div>
+                    <div class="kpi-info">
+                        <h4>Selected Revenue</h4>
+                        <div class="kpi-num" id="repTotalRevenue">Rs. 0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon coral">🧾</div>
+                    <div class="kpi-info">
+                        <h4>Total Invoices</h4>
+                        <div class="kpi-num" id="repTotalOrders">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon blue">✅</div>
+                    <div class="kpi-info">
+                        <h4>Fulfilled Deliveries</h4>
+                        <div class="kpi-num" id="repDeliveredOrders">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon gold">📊</div>
+                    <div class="kpi-info">
+                        <h4>Average Order Value</h4>
+                        <div class="kpi-num" id="repAov">Rs. 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ledger Table -->
+            <div class="panel-card" style="padding:0; overflow:hidden;">
+                <div class="data-table-wrap" style="border:none;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Timestamp</th>
+                                <th>Customer</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Amount (INR)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const startDateInput = document.getElementById('reportStartDate');
+            const endDateInput = document.getElementById('reportEndDate');
+            const applyBtn = document.getElementById('applyDateFilterBtn');
+            const resetBtn = document.getElementById('resetDateFilterBtn');
+            const csvBtn = document.getElementById('downloadCsvBtn');
+            const tbody = document.getElementById('reportTbody');
+
+            let currentFilteredOrders = [];
+
+            function loadReport(startDate = null, endDate = null) {
+                const report = Store.getSalesReport(startDate, endDate);
+                currentFilteredOrders = report.orders;
+
+                document.getElementById('repTotalRevenue').textContent = 'Rs. ' + report.totalRevenue.toLocaleString('en-IN');
+                document.getElementById('repTotalOrders').textContent = report.totalOrders;
+                document.getElementById('repDeliveredOrders').textContent = report.deliveredOrders;
+                const aov = report.totalOrders > 0 ? Math.round(report.totalRevenue / report.totalOrders) : 0;
+                document.getElementById('repAov').textContent = 'Rs. ' + aov.toLocaleString('en-IN');
+
+                tbody.innerHTML = report.orders.map(o => {
+                    const full = Store.getOrderById(o.order_id);
+                    return `
+                        <tr>
+                            <td><strong style="color:var(--secondary);">#${o.order_id}</strong></td>
+                            <td style="font-size:0.85rem; color:var(--text-muted);">${o.order_date}</td>
+                            <td><strong>${full.customer.name || 'Customer'}</strong></td>
+                            <td><span style="font-size:0.85rem;">${full.payment ? full.payment.mode : 'Online'}</span></td>
+                            <td>
+                                <span class="status-pill status-${o.status.toLowerCase().replace(/\s+/g, '-')}">
+                                    ${o.status}
+                                </span>
+                            </td>
+                            <td style="text-align:right; font-weight:800; color:var(--primary); font-size:1.05rem;">
+                                Rs. ${o.total_amount}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            applyBtn.addEventListener('click', () => {
+                const start = startDateInput.value;
+                const end = endDateInput.value;
+                loadReport(start || null, end || null);
+            });
+
+            resetBtn.addEventListener('click', () => {
+                startDateInput.value = '';
+                endDateInput.value = '';
+                loadReport();
+            });
+
+            // Generate and trigger CSV download
+            csvBtn.addEventListener('click', () => {
+                if (currentFilteredOrders.length === 0) {
+                    App.showToast('No orders available to export.', 'error');
+                    return;
+                }
+
+                let csvContent = 'data:text/csv;charset=utf-8,';
+                csvContent += 'Order ID,Date Time,Customer Name,Phone,Address,Payment Mode,Status,Total Amount (INR)\r\n';
+
+                currentFilteredOrders.forEach(o => {
+                    const full = Store.getOrderById(o.order_id);
+                    const row = [
+                        o.order_id,
+                        `"${o.order_date}"`,
+                        `"${full.customer.name || 'Customer'}"`,
+                        `"${full.customer.phone || ''}"`,
+                        `"${(o.delivery_address || '').replace(/"/g, '""')}"`,
+                        full.payment ? full.payment.mode : 'UPI',
+                        o.status,
+                        o.total_amount
+                    ];
+                    csvContent += row.join(',') + '\r\n';
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement('a');
+                link.setAttribute('href', encodedUri);
+                link.setAttribute('download', `SpiceRoute_Sales_Report_${Date.now()}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                App.showToast('Sales Report downloaded successfully!', 'success');
+            });
+
+            // Initial load
+            loadReport();
+        });
+    </script>
+</body>
+</html>

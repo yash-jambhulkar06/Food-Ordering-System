@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Profile – SpiceRoute</title>
+    <meta name="description" content="Manage your SpiceRoute customer profile, contact numbers, and saved delivery addresses.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span></span>
+            </a>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="menu.html" class="nav-link">Menu</a></li>
+                <li><a href="orders.html" class="nav-link">My Orders</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="cart.html" class="cart-btn-link" title="Shopping Cart">
+                    <span>🛒 Cart</span>
+                    <span class="cart-badge-count" id="navCartBadge">0</span>
+                </a>
+                <div id="navUserSlot" style="display:flex; align-items:center; gap:12px;"></div>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">&#9776;</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Profile Section -->
+    <section class="section" style="padding: 40px 0 80px;">
+        <div class="container" style="max-width:760px;">
+            <div class="panel-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:1px solid var(--border-color); padding-bottom:16px;">
+                    <div>
+                        <h1 style="font-size:1.8rem; color:var(--secondary); margin-bottom:4px;">Account Settings</h1>
+                        <p style="color:var(--text-muted); font-size:0.9rem;">Manage your personal profile and default dining delivery details.</p>
+                    </div>
+                    <button onclick="App.handleLogout()" class="btn btn-outline btn-sm">
+                        Sign Out
+                    </button>
+                </div>
+
+                <!-- Account Stats Grid -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px;">
+                    <div style="background:var(--bg-main); padding:18px; border-radius:var(--radius-md); text-align:center;">
+                        <h4 style="font-size:0.82rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;">Total Orders Placed</h4>
+                        <span id="profOrdersCount" style="font-size:1.6rem; font-weight:800; color:var(--secondary);">0</span>
+                    </div>
+                    <div style="background:var(--bg-main); padding:18px; border-radius:var(--radius-md); text-align:center;">
+                        <h4 style="font-size:0.82rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;">Total Amount Spent</h4>
+                        <span id="profSpentAmount" style="font-size:1.6rem; font-weight:800; color:var(--primary);">Rs. 0</span>
+                    </div>
+                </div>
+
+                <!-- Profile Edit Form -->
+                <form id="profileForm">
+                    <div class="form-field">
+                        <label for="profName" class="field-label">Full Name *</label>
+                        <input type="text" id="profName" class="input-control" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="profEmail" class="field-label">Email Address (Read-only)</label>
+                        <input type="email" id="profEmail" class="input-control" readonly style="background:#f1f5f9; cursor:not-allowed;">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="profPhone" class="field-label">Primary Mobile Number (10 digits) *</label>
+                        <input type="tel" id="profPhone" class="input-control" maxlength="10" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="profAddress" class="field-label">Default Delivery Address *</label>
+                        <textarea id="profAddress" class="input-control" rows="3" required></textarea>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-wrap">
+        <div class="container">
+            <div class="footer-copyright">
+                <p>&copy; 2026 SpiceRoute Restaurant Private Limited. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/store.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = Store.getCurrentUser();
+            if (!currentUser) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            const nameInput = document.getElementById('profName');
+            const emailInput = document.getElementById('profEmail');
+            const phoneInput = document.getElementById('profPhone');
+            const addressInput = document.getElementById('profAddress');
+
+            nameInput.value = currentUser.name || '';
+            emailInput.value = currentUser.email || '';
+            phoneInput.value = currentUser.phone || '';
+            addressInput.value = currentUser.address || '';
+
+            // Calculate user orders and spent
+            const orders = Store.getOrders({ user_id: currentUser.user_id });
+            document.getElementById('profOrdersCount').textContent = orders.length;
+            const spent = orders.reduce((sum, o) => sum + o.total_amount, 0);
+            document.getElementById('profSpentAmount').textContent = 'Rs. ' + spent.toLocaleString('en-IN');
+
+            const form = document.getElementById('profileForm');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const phoneVal = phoneInput.value.trim();
+                if (!phoneVal.match(/^[0-9]{10}$/)) {
+                    App.showToast('Please enter a valid 10-digit mobile number.', 'error');
+                    phoneInput.focus();
+                    return;
+                }
+
+                const result = Store.updateUserProfile({
+                    name: nameInput.value.trim(),
+                    phone: phoneVal,
+                    address: addressInput.value.trim()
+                });
+
+                if (result.success) {
+                    App.showToast('Profile updated successfully!', 'success');
+                    App.syncNavbar();
+                } else {
+                    App.showToast(result.message || 'Update failed.', 'error');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

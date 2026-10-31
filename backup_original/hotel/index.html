@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Kitchen & Order Dispatch Panel – SpiceRoute</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏨</text></svg>">
+    <style>
+        .kds-card {
+            background: #fff;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .kds-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        .kds-card-head {
+            padding: 14px 18px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .kds-card-body {
+            padding: 18px;
+            flex: 1;
+        }
+        .kds-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #f1f5f9;
+            font-size: 0.92rem;
+        }
+        .kds-item-row:last-child {
+            border-bottom: none;
+        }
+        .kds-card-footer {
+            padding: 14px 18px;
+            background: #fff;
+            border-top: 1px solid var(--border-color);
+        }
+        .kds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+        .sound-badge {
+            cursor: pointer;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            background: #e2e8f0;
+            color: #334155;
+            transition: var(--transition);
+        }
+        .sound-badge.active {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+        .btn-pack {
+            background: #7c3aed;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        .btn-pack:hover {
+            background: #6d28d9;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+        .btn-cook {
+            background: #f59e0b;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        .btn-cook:hover {
+            background: #d97706;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        .btn-dispatch {
+            background: #0284c7;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        .btn-dispatch:hover {
+            background: #0369a1;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+        .badge-live-pulse {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+            animation: pulseGreen 1.6s infinite;
+        }
+        @keyframes pulseGreen {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body style="background:#f1f5f9;">
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🏨</div>
+                <span>Spice<span>Route</span> <small style="font-size:0.75rem; color:#d97706; font-weight:700; text-transform:uppercase; margin-left:6px; letter-spacing:1px;">Hotel Kitchen</small></span>
+            </a>
+
+            <div class="nav-actions">
+                <div id="soundToggle" class="sound-badge active" title="Toggle audio alert on incoming orders">
+                    <span>🔔</span> Audio Chime: ON
+                </div>
+                <a href="../orders.html" class="btn btn-outline btn-sm">Client View</a>
+                <a href="../delivery/index.html" class="btn btn-outline btn-sm">Delivery Hub</a>
+                <a href="../admin/index.html" class="btn btn-outline btn-sm">Admin</a>
+                <button onclick="App.handleLogout()" class="btn btn-danger btn-sm">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main style="padding: 30px 0 80px;">
+        <div class="container">
+            <!-- Header Banner -->
+            <div style="background:#fff; border-radius:var(--radius-lg); border:1px solid var(--border-color); padding:24px 28px; margin-bottom:28px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:18px;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                        <span class="badge-live-pulse"></span>
+                        <span style="font-size:0.85rem; font-weight:700; color:#10b981; text-transform:uppercase; letter-spacing:1px;">Live Kitchen Display System (KDS)</span>
+                    </div>
+                    <h1 style="font-size:1.9rem; color:var(--secondary); margin-bottom:6px;">Hotel Order Management & Kitchen Packing</h1>
+                    <p style="color:var(--text-muted); font-size:0.95rem;">Receive incoming tickets from clients, accept & start cooking, seal parcels into food packages, and dispatch to delivery couriers.</p>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <button id="btnManualRefresh" class="btn btn-outline btn-sm">🔄 Refresh Orders</button>
+                    <div style="font-size:0.85rem; color:var(--text-muted); text-align:right;">
+                        Chef On Duty:<br><strong style="color:var(--secondary);">Chef Sanjeev</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow Stage Explanation Card -->
+            <div style="background:linear-gradient(135deg, #fef3c7 0%, #ede9fe 100%); border:1px solid rgba(217,119,6,0.2); border-radius:var(--radius-md); padding:16px 22px; margin-bottom:26px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                    <span style="font-size:1.8rem;">👨‍🍳</span>
+                    <div>
+                        <strong style="color:#78350f; font-size:0.98rem;">Restaurant Kitchen Lifecycle:</strong>
+                        <div style="font-size:0.85rem; color:#92400e;">1. Client Places Order ➔ 2. Hotel Receives & Cooks (Preparing) ➔ 3. Hotel Packs Food (Packed) ➔ 4. Handover to Courier (Out for Delivery) ➔ 5. Client Receives Food</div>
+                    </div>
+                </div>
+                <div style="font-size:0.85rem; font-weight:700; color:#6d28d9; background:#fff; padding:6px 14px; border-radius:20px; border:1px solid rgba(109,40,217,0.2);">
+                    Hotel Station #1 Active
+                </div>
+            </div>
+
+            <!-- KDS Metrics / Tabs Bar -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:28px;">
+                <button class="kds-metric-tab active" id="tabNew" data-stage="Placed" style="background:#fff; border:2px solid var(--info); border-radius:var(--radius-md); padding:16px; text-align:left; cursor:pointer;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.82rem; font-weight:700; color:var(--info); text-transform:uppercase;">1. New Orders</span>
+                        <span id="badgeCountPlaced" style="background:var(--info); color:#fff; font-weight:800; font-size:0.8rem; padding:2px 8px; border-radius:12px;">0</span>
+                    </div>
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--secondary); margin-top:6px;">Incoming</div>
+                    <div style="font-size:0.78rem; color:var(--text-muted);">Needs Kitchen Acceptance</div>
+                </button>
+
+                <button class="kds-metric-tab" id="tabCooking" data-stage="Preparing" style="background:#fff; border:2px solid transparent; border-radius:var(--radius-md); padding:16px; text-align:left; cursor:pointer;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.82rem; font-weight:700; color:#d97706; text-transform:uppercase;">2. Cooking</span>
+                        <span id="badgeCountPreparing" style="background:#d97706; color:#fff; font-weight:800; font-size:0.8rem; padding:2px 8px; border-radius:12px;">0</span>
+                    </div>
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--secondary); margin-top:6px;">In Kitchen</div>
+                    <div style="font-size:0.78rem; color:var(--text-muted);">Chef Cooking Dishes</div>
+                </button>
+
+                <button class="kds-metric-tab" id="tabPacked" data-stage="Packed" style="background:#fff; border:2px solid transparent; border-radius:var(--radius-md); padding:16px; text-align:left; cursor:pointer;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.82rem; font-weight:700; color:#7c3aed; text-transform:uppercase;">3. Packed</span>
+                        <span id="badgeCountPacked" style="background:#7c3aed; color:#fff; font-weight:800; font-size:0.8rem; padding:2px 8px; border-radius:12px;">0</span>
+                    </div>
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--secondary); margin-top:6px;">Ready to Handover</div>
+                    <div style="font-size:0.78rem; color:var(--text-muted);">Sealed in Bag for Courier</div>
+                </button>
+
+                <button class="kds-metric-tab" id="tabDispatched" data-stage="Out for Delivery" style="background:#fff; border:2px solid transparent; border-radius:var(--radius-md); padding:16px; text-align:left; cursor:pointer;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.82rem; font-weight:700; color:#0284c7; text-transform:uppercase;">4. Dispatched</span>
+                        <span id="badgeCountDispatched" style="background:#0284c7; color:#fff; font-weight:800; font-size:0.8rem; padding:2px 8px; border-radius:12px;">0</span>
+                    </div>
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--secondary); margin-top:6px;">On the Road</div>
+                    <div style="font-size:0.78rem; color:var(--text-muted);">With Delivery Courier</div>
+                </button>
+            </div>
+
+            <!-- Orders Container -->
+            <div id="kdsOrdersContainer" class="kds-grid">
+                <!-- Injected dynamically via JS -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="kdsEmptyState" style="display:none; text-align:center; padding:70px 20px; background:#fff; border-radius:var(--radius-lg); border:1px solid var(--border-color);">
+                <div style="font-size:3.5rem; margin-bottom:12px;">✨</div>
+                <h3 style="font-size:1.4rem; color:var(--secondary); margin-bottom:6px;">All Clear in this Kitchen Station!</h3>
+                <p style="color:var(--text-muted); margin-bottom:18px;">No tickets currently require actions in this stage.</p>
+                <button onclick="switchTab('Placed')" class="btn btn-outline btn-sm">Check New Placed Orders</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Kitchen Order Ticket (KOT) Modal -->
+    <div id="kotModal" class="modal-backdrop">
+        <div class="modal-window" style="max-width:540px;">
+            <div class="modal-head" style="background:#1e293b; color:#fff;">
+                <h3 id="kotHeading">🍳 Kitchen Order Ticket (KOT)</h3>
+                <button class="modal-dismiss" onclick="App.closeModal('kotModal')" style="color:#fff;">&times;</button>
+            </div>
+            <div class="modal-body" id="kotContent" style="font-family:monospace; font-size:0.95rem; line-height:1.6;">
+                <!-- Dynamically generated ticket -->
+            </div>
+            <div style="padding:14px 20px; background:#f8fafc; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                <button onclick="window.print()" class="btn btn-outline btn-sm">🖨️ Print Ticket</button>
+                <button onclick="App.closeModal('kotModal')" class="btn btn-primary btn-sm">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Handover to Courier Modal -->
+    <div id="handoverModal" class="modal-backdrop">
+        <div class="modal-window" style="max-width:480px;">
+            <div class="modal-head">
+                <h3>🛵 Handover Parcel to Delivery Courier</h3>
+                <button class="modal-dismiss" onclick="App.closeModal('handoverModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="handoverOrderId">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:6px;">Order Number:</div>
+                    <strong id="handoverOrderDisplay" style="font-size:1.2rem; color:var(--secondary);">#1005</strong>
+                </div>
+
+                <div class="form-field" style="margin-bottom:20px;">
+                    <label class="field-label">Select Ready Delivery Courier *</label>
+                    <select id="handoverCourierSelect" class="input-control" style="font-weight:600;">
+                        <!-- Injected couriers -->
+                    </select>
+                </div>
+
+                <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radius-sm); padding:12px 16px; font-size:0.86rem; color:#1e40af; margin-bottom:20px;">
+                    ℹ️ Once handed over, the client will immediately see that the order is <strong>Out for Delivery</strong> and courier details will be displayed on their live tracking stepper.
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:12px;">
+                    <button type="button" class="btn btn-outline" onclick="App.closeModal('handoverModal')">Cancel</button>
+                    <button type="button" id="btnConfirmHandover" class="btn btn-primary">Confirm Handover & Dispatch</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('kdsOrdersContainer');
+            const emptyState = document.getElementById('kdsEmptyState');
+            const btnRefresh = document.getElementById('btnManualRefresh');
+            const soundToggle = document.getElementById('soundToggle');
+
+            let currentStage = 'Placed'; // 'Placed', 'Preparing', 'Packed', 'Out for Delivery'
+            let soundEnabled = true;
+            let previousPlacedCount = 0;
+
+            // Audio Synthesis Chime for incoming hotel orders
+            function playOrderChime() {
+                if (!soundEnabled) return;
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2); // A5
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.5);
+                } catch(e) {}
+            }
+
+            if (soundToggle) {
+                soundToggle.addEventListener('click', () => {
+                    soundEnabled = !soundEnabled;
+                    if (soundEnabled) {
+                        soundToggle.classList.add('active');
+                        soundToggle.innerHTML = '<span>🔔</span> Audio Chime: ON';
+                        playOrderChime();
+                    } else {
+                        soundToggle.classList.remove('active');
+                        soundToggle.innerHTML = '<span>🔕</span> Audio Chime: OFF';
+                    }
+                });
+            }
+
+            function updateTabStyles() {
+                document.querySelectorAll('.kds-metric-tab').forEach(tab => {
+                    if (tab.getAttribute('data-stage') === currentStage) {
+                        tab.style.borderColor = 'var(--primary)';
+                        tab.style.boxShadow = '0 4px 12px rgba(226,55,68,0.15)';
+                    } else {
+                        tab.style.borderColor = 'transparent';
+                        tab.style.boxShadow = 'none';
+                    }
+                });
+            }
+
+            window.switchTab = function(stage) {
+                currentStage = stage;
+                updateTabStyles();
+                renderKds();
+            };
+
+            document.querySelectorAll('.kds-metric-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.getAttribute('data-stage'));
+                });
+            });
+
+            function renderKds() {
+                const allOrders = Store.getOrders();
+
+                // Calculate Counts
+                const placed = allOrders.filter(o => o.status === 'Placed');
+                const preparing = allOrders.filter(o => o.status === 'Preparing');
+                const packed = allOrders.filter(o => o.status === 'Packed');
+                const dispatched = allOrders.filter(o => o.status === 'Out for Delivery');
+
+                document.getElementById('badgeCountPlaced').textContent = placed.length;
+                document.getElementById('badgeCountPreparing').textContent = preparing.length;
+                document.getElementById('badgeCountPacked').textContent = packed.length;
+                document.getElementById('badgeCountDispatched').textContent = dispatched.length;
+
+                // Sound Alert on new incoming placed orders
+                if (placed.length > previousPlacedCount && previousPlacedCount > 0) {
+                    playOrderChime();
+                    App.showToast(`🔔 New Order #${placed[0].order_id} Received in Hotel Kitchen!`, 'success');
+                }
+                previousPlacedCount = placed.length;
+
+                // Filter for selected tab
+                let filtered = [];
+                if (currentStage === 'Placed') filtered = placed;
+                else if (currentStage === 'Preparing') filtered = preparing;
+                else if (currentStage === 'Packed') filtered = packed;
+                else if (currentStage === 'Out for Delivery') filtered = dispatched;
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+
+                container.innerHTML = filtered.map(orderBasic => {
+                    const o = Store.getOrderById(orderBasic.order_id) || orderBasic;
+                    const items = o.items || [];
+                    const itemCount = items.reduce((sum, it) => sum + (Number(it.quantity) || 1), 0);
+
+                    // Stage action button determination
+                    let actionButtonHtml = '';
+                    if (o.status === 'Placed') {
+                        actionButtonHtml = `
+                            <button onclick="hotelStartCooking(${o.order_id})" class="btn-cook">
+                                🍳 Accept & Start Cooking
+                            </button>
+                        `;
+                    } else if (o.status === 'Preparing') {
+                        actionButtonHtml = `
+                            <button onclick="hotelPackOrder(${o.order_id})" class="btn-pack">
+                                📦 Food Ready – Pack in Parcel
+                            </button>
+                        `;
+                    } else if (o.status === 'Packed') {
+                        actionButtonHtml = `
+                            <button onclick="openHandoverModal(${o.order_id})" class="btn-dispatch">
+                                🛵 Handover to Delivery Courier
+                            </button>
+                        `;
+                    } else if (o.status === 'Out for Delivery') {
+                        actionButtonHtml = `
+                            <div style="background:#e0f2fe; color:#0369a1; padding:10px; border-radius:var(--radius-sm); text-align:center; font-weight:700; font-size:0.88rem;">
+                                🛵 With Courier: ${o.deliveryStaff ? o.deliveryStaff.name : 'Assigned Courier'}
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="kds-card" id="kds_card_${o.order_id}">
+                            <div class="kds-card-head">
+                                <div>
+                                    <strong style="color:var(--secondary); font-size:1.15rem;">Ticket #${o.order_id}</strong>
+                                    <div style="font-size:0.78rem; color:var(--text-muted);">${o.order_date}</div>
+                                </div>
+                                <span class="status-pill status-${o.status.toLowerCase().replace(/\s+/g, '-')}">
+                                    ${o.status}
+                                </span>
+                            </div>
+
+                            <div class="kds-card-body">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:0.86rem; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+                                    <span>👤 <strong>${o.customer ? o.customer.name : 'Customer'}</strong></span>
+                                    <span style="color:var(--text-muted); font-size:0.8rem;">📦 ${itemCount} Item(s)</span>
+                                </div>
+
+                                <div style="margin-bottom:16px;">
+                                    ${items.map(it => `
+                                        <div class="kds-item-row">
+                                            <div>
+                                                <span style="font-weight:800; color:var(--primary); font-size:1.05rem; margin-right:6px;">${it.quantity}x</span>
+                                                <strong style="color:var(--secondary);">${it.name || 'Dish'}</strong>
+                                            </div>
+                                            <span style="font-size:0.82rem; color:var(--text-muted);">Rs. ${it.price * it.quantity}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                <div style="background:#f8fafc; padding:10px 14px; border-radius:var(--radius-sm); font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+                                    📍 <strong>Destination:</strong> ${o.delivery_address}
+                                </div>
+
+                                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
+                                    <button onclick="viewKotTicket(${o.order_id})" class="btn btn-outline btn-sm" style="font-size:0.8rem; padding:4px 10px;">
+                                        🖨️ KOT Ticket
+                                    </button>
+                                    <span style="font-size:1.15rem; font-weight:800; color:var(--primary);">Rs. ${o.total_amount}</span>
+                                </div>
+                            </div>
+
+                            <div class="kds-card-footer">
+                                ${actionButtonHtml}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // ================= WORKFLOW ACTIONS =================
+
+            // Action 1: Hotel Accepts & Starts Cooking
+            window.hotelStartCooking = function(orderId) {
+                Store.updateOrderStatus(orderId, 'Preparing');
+                App.showToast(`🍳 Kitchen Ticket #${orderId} accepted! Chef is now cooking.`, 'success');
+                renderKds();
+            };
+
+            // Action 2: Hotel Finishes Cooking & Packs Order
+            window.hotelPackOrder = function(orderId) {
+                Store.updateOrderStatus(orderId, 'Packed');
+                App.showToast(`📦 Order #${orderId} has been securely packed and sealed in thermal bag!`, 'success');
+                renderKds();
+            };
+
+            // Action 3: Open Handover Courier Modal
+            window.openHandoverModal = function(orderId) {
+                document.getElementById('handoverOrderId').value = orderId;
+                document.getElementById('handoverOrderDisplay').textContent = '#' + orderId;
+
+                const courierSelect = document.getElementById('handoverCourierSelect');
+                const staffList = Store.getDeliveryStaff();
+                courierSelect.innerHTML = staffList.map(s => `
+                    <option value="${s.user_id}">🚴 ${s.name} (${s.phone}) - Ready</option>
+                `).join('');
+
+                App.openModal('handoverModal');
+            };
+
+            // Action 3b: Confirm Courier Handover
+            document.getElementById('btnConfirmHandover').addEventListener('click', () => {
+                const orderId = document.getElementById('handoverOrderId').value;
+                const courierId = document.getElementById('handoverCourierSelect').value;
+
+                Store.updateOrderStatus(orderId, 'Out for Delivery', Number(courierId));
+                App.closeModal('handoverModal');
+                App.showToast(`🛵 Order #${orderId} dispatched to courier! Client will see Out for Delivery.`, 'success');
+                renderKds();
+            });
+
+            // Action 4: View Kitchen Order Ticket (KOT)
+            window.viewKotTicket = function(orderId) {
+                const o = Store.getOrderById(orderId);
+                if (!o) return;
+
+                document.getElementById('kotHeading').textContent = `Kitchen Order Ticket #${o.order_id}`;
+                document.getElementById('kotContent').innerHTML = `
+========================================
+       SPICEROUTE RESTAURANT & HOTEL    
+           KITCHEN ORDER TICKET (KOT)   
+========================================
+Order ID: #${o.order_id}
+Date:     ${o.order_date}
+Customer: ${o.customer ? o.customer.name : 'Customer'}
+Phone:    ${o.customer ? o.customer.phone : 'N/A'}
+Status:   ${o.status}
+----------------------------------------
+QTY   ITEM DESCRIPTION            AMOUNT
+----------------------------------------
+${(o.items || []).map(it => {
+    const qty = String(it.quantity).padEnd(4, ' ');
+    const name = String(it.name || 'Dish').slice(0, 24).padEnd(25, ' ');
+    const price = 'Rs. ' + (it.price * it.quantity);
+    return `${qty}  ${name} ${price}`;
+}).join('\n')}
+----------------------------------------
+TOTAL BILL: Rs. ${o.total_amount}
+PAYMENT:    ${o.payment ? o.payment.mode : 'Online'} (${o.payment ? o.payment.payment_status : 'Paid'})
+----------------------------------------
+PACKAGING INSTRUCTIONS:
+[ ] Seal in airtight thermal container
+[ ] Include mint chutney & cutlery kit
+[ ] Verify order number tag on parcel
+========================================
+`;
+                App.openModal('kotModal');
+            };
+
+            if (btnRefresh) {
+                btnRefresh.addEventListener('click', async () => {
+                    btnRefresh.disabled = true;
+                    btnRefresh.textContent = 'Refreshing...';
+                    await Store.syncFromBackend();
+                    btnRefresh.disabled = false;
+                    btnRefresh.textContent = '🔄 Refresh Orders';
+                    renderKds();
+                    App.showToast('Kitchen tickets synced with database!', 'success');
+                });
+            }
+
+            // Initial fetch & render
+            updateTabStyles();
+            Store.syncFromBackend().then(() => {
+                renderKds();
+            });
+
+            window.addEventListener('storeSynced', () => {
+                renderKds();
+            });
+
+            // Auto-refresh interval (every 4 seconds) to detect incoming orders in real time
+            setInterval(() => {
+                Store.syncFromBackend().then(() => {
+                    renderKds();
+                });
+            }, 4000);
+        });
+    </script>
+</body>
+</html>

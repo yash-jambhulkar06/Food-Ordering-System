@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Kitchen & Dispatch Dashboard – SpiceRoute</title>
+    <meta name="description" content="Hotel Kitchen Order Management and Dispatch Dashboard for SpiceRoute.">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏨</text></svg>">
+    <style>
+        .hotel-header {
+            background: #fff;
+            border-bottom: 2px solid #fde68a;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card-hotel {
+            background: #fff;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .order-ticket {
+            background: #fff;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        .order-ticket:hover {
+            box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+        }
+        .ticket-header {
+            padding: 14px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .ticket-body {
+            padding: 20px;
+        }
+        .ticket-footer {
+            padding: 14px 20px;
+            background: #fdfdfd;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .items-list-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+        .items-list-table td {
+            padding: 8px 12px;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 0.92rem;
+        }
+        .items-list-table tr:last-child td {
+            border-bottom: none;
+        }
+        .btn-action-cook {
+            background: #f59e0b;
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-action-cook:hover {
+            background: #d97706;
+        }
+        .btn-action-pack {
+            background: #8b5cf6;
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-action-pack:hover {
+            background: #7c3aed;
+        }
+        .btn-action-dispatch {
+            background: #10b981;
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-action-dispatch:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body style="background:#f8fafc;">
+
+    <!-- Top Hotel Header -->
+    <header class="navbar hotel-header">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon" style="background:#d97706;">🏨</div>
+                <span>Spice<span>Route</span> <small style="font-size:0.75rem; color:#d97706; font-weight:700; text-transform:uppercase; margin-left:4px;">Hotel Kitchen</small></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="../orders.html" class="btn btn-outline btn-sm">Customer View</a>
+                <span id="chefNameBadge" style="font-size:0.88rem; font-weight:700; color:#b45309; background:#fef3c7; padding:4px 10px; border-radius:20px;">
+                    👨‍🍳 Chef Sanjeev
+                </span>
+                <button onclick="App.handleLogout()" class="btn btn-outline btn-sm">Log Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="container" style="padding-top:30px; padding-bottom:60px;">
+        
+        <!-- Header Controls -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+            <div>
+                <h1 style="font-size:1.6rem; color:var(--secondary); margin-bottom:4px;">Kitchen Order Pipeline</h1>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin:0;">Receive customer orders, cook dishes, and pack parcels for delivery courier</p>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <span style="font-size:0.85rem; color:var(--text-muted);" id="lastRefreshText">Auto-refreshing</span>
+                <button onclick="loadOrders()" class="btn btn-outline btn-sm" style="display:flex; align-items:center; gap:6px;">
+                    🔄 Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card-hotel">
+                <div class="stat-icon" style="background:#fee2e2; color:#ef4444;">🔔</div>
+                <div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">New Orders</div>
+                    <div id="countPlaced" style="font-size:1.5rem; font-weight:800; color:var(--secondary);">0</div>
+                </div>
+            </div>
+            <div class="stat-card-hotel">
+                <div class="stat-icon" style="background:#fef3c7; color:#d97706;">🍳</div>
+                <div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Cooking Now</div>
+                    <div id="countPreparing" style="font-size:1.5rem; font-weight:800; color:#d97706;">0</div>
+                </div>
+            </div>
+            <div class="stat-card-hotel">
+                <div class="stat-icon" style="background:#ede9fe; color:#8b5cf6;">📦</div>
+                <div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Packed & Ready</div>
+                    <div id="countPacked" style="font-size:1.5rem; font-weight:800; color:#7c3aed;">0</div>
+                </div>
+            </div>
+            <div class="stat-card-hotel">
+                <div class="stat-icon" style="background:#dcfce7; color:#10b981;">🚴</div>
+                <div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Dispatched</div>
+                    <div id="countDispatched" style="font-size:1.5rem; font-weight:800; color:#166534;">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tab Buttons -->
+        <div style="display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap;">
+            <button class="chip-btn active" onclick="setFilter('All', this)">All Orders</button>
+            <button class="chip-btn" onclick="setFilter('Placed', this)">🔔 New Orders</button>
+            <button class="chip-btn" onclick="setFilter('Preparing', this)">🍳 Cooking</button>
+            <button class="chip-btn" onclick="setFilter('Packed', this)">📦 Ready for Dispatch</button>
+            <button class="chip-btn" onclick="setFilter('Out for Delivery', this)">🚴 On the Way</button>
+            <button class="chip-btn" onclick="setFilter('Delivered', this)">✓ Delivered</button>
+        </div>
+
+        <!-- Orders Container -->
+        <div id="ordersContainer">
+            <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyOrdersState" style="display:none; text-align:center; padding:60px 20px; background:#fff; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+            <div style="font-size:3.5rem; margin-bottom:12px;">🍽️</div>
+            <h3 style="font-size:1.3rem; color:var(--secondary); margin-bottom:6px;">No Orders in this Category</h3>
+            <p style="color:var(--text-muted); font-size:0.92rem; margin:0;">Incoming customer orders will automatically appear here in real time.</p>
+        </div>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        let allOrders = [];
+        let deliveryCouriers = [];
+        let activeFilter = 'All';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const currentUser = Store.getCurrentUser();
+            if (!currentUser || (currentUser.role !== 'hotel' && currentUser.role !== 'admin')) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            document.getElementById('chefNameBadge').textContent = `👨‍🍳 ${currentUser.name}`;
+
+            // Load delivery couriers for dispatch dropdown
+            deliveryCouriers = await Store.getDeliveryBoys();
+
+            await loadOrders();
+
+            // Auto-refresh every 8 seconds
+            setInterval(loadOrders, 8000);
+        });
+
+        async function loadOrders() {
+            try {
+                allOrders = await Store.getOrders();
+                updateKpiStats();
+                renderOrders();
+                document.getElementById('lastRefreshText').textContent = `Updated ${new Date().toLocaleTimeString()}`;
+            } catch (err) {
+                console.error('Failed to load hotel orders:', err);
+            }
+        }
+
+        function updateKpiStats() {
+            const placed = allOrders.filter(o => o.status === 'Placed').length;
+            const preparing = allOrders.filter(o => o.status === 'Preparing').length;
+            const packed = allOrders.filter(o => o.status === 'Packed').length;
+            const dispatched = allOrders.filter(o => o.status === 'Out for Delivery' || o.status === 'Delivered').length;
+
+            document.getElementById('countPlaced').textContent = placed;
+            document.getElementById('countPreparing').textContent = preparing;
+            document.getElementById('countPacked').textContent = packed;
+            document.getElementById('countDispatched').textContent = dispatched;
+        }
+
+        window.setFilter = function(filter, btn) {
+            activeFilter = filter;
+            document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderOrders();
+        };
+
+        function renderOrders() {
+            const container = document.getElementById('ordersContainer');
+            const emptyState = document.getElementById('emptyOrdersState');
+
+            let filtered = allOrders;
+            if (activeFilter !== 'All') {
+                filtered = allOrders.filter(o => o.status === activeFilter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            container.innerHTML = filtered.map(order => {
+                const customerName = order.customer ? order.customer.name : 'Valued Customer';
+                const customerPhone = order.customer ? order.customer.phone : 'Not provided';
+                const paymentBadge = order.payment && order.payment.mode === 'COD' 
+                    ? `<span style="background:#fee2e2; color:#991b1b; padding:4px 8px; border-radius:4px; font-weight:700; font-size:0.8rem;">💵 COD - Collect ₹${order.total_amount}</span>`
+                    : `<span style="background:#dcfce7; color:#166534; padding:4px 8px; border-radius:4px; font-weight:700; font-size:0.8rem;">✓ Prepaid (${order.payment ? order.payment.mode : 'Online'})</span>`;
+
+                // Status Badge Color
+                let statusBadgeStyle = 'background:#e2e8f0; color:#334155;';
+                if (order.status === 'Placed') statusBadgeStyle = 'background:#fee2e2; color:#991b1b; font-weight:700;';
+                if (order.status === 'Preparing') statusBadgeStyle = 'background:#fef3c7; color:#92400e; font-weight:700;';
+                if (order.status === 'Packed') statusBadgeStyle = 'background:#ede9fe; color:#6b21a8; font-weight:700;';
+                if (order.status === 'Out for Delivery') statusBadgeStyle = 'background:#e0f2fe; color:#0369a1; font-weight:700;';
+                if (order.status === 'Delivered') statusBadgeStyle = 'background:#dcfce7; color:#166534; font-weight:700;';
+
+                // Kitchen Action Buttons based on status
+                let actionHtml = '';
+
+                if (order.status === 'Placed') {
+                    actionHtml = `
+                        <button onclick="handleAdvanceStatus(${order.order_id}, 'Preparing')" class="btn-action-cook">
+                            🍳 Accept & Start Cooking
+                        </button>
+                    `;
+                } else if (order.status === 'Preparing') {
+                    actionHtml = `
+                        <button onclick="handleAdvanceStatus(${order.order_id}, 'Packed')" class="btn-action-pack">
+                            📦 Food Cooked & Packed
+                        </button>
+                    `;
+                } else if (order.status === 'Packed') {
+                    const courierOptions = deliveryCouriers.map(d => 
+                        `<option value="${d.user_id}">${d.name} (${d.phone})</option>`
+                    ).join('');
+
+                    actionHtml = `
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <select id="courierSelect_${order.order_id}" class="input-control" style="width:auto; padding:8px 12px; font-size:0.88rem;">
+                                ${courierOptions || '<option value="2">Suresh Patil (Default Courier)</option>'}
+                            </select>
+                            <button onclick="handleDispatchWithCourier(${order.order_id})" class="btn-action-dispatch">
+                                🚴 Handover to Courier (Dispatch)
+                            </button>
+                        </div>
+                    `;
+                } else if (order.status === 'Out for Delivery') {
+                    actionHtml = `
+                        <span style="color:#0284c7; font-weight:700; font-size:0.9rem;">
+                            🛵 On the way with courier
+                        </span>
+                    `;
+                } else if (order.status === 'Delivered') {
+                    actionHtml = `
+                        <span style="color:var(--success); font-weight:700; font-size:0.9rem;">
+                            ✓ Successfully Delivered to Customer
+                        </span>
+                    `;
+                }
+
+                // Render dishes
+                const itemsRows = (order.items || []).map(it => `
+                    <tr>
+                        <td style="font-weight:700; width:60px; color:#d97706;">x${it.quantity}</td>
+                        <td style="font-weight:600; color:var(--secondary);">${it.name}</td>
+                        <td style="text-align:right; color:var(--text-muted); font-size:0.88rem;">₹${it.price * it.quantity}</td>
+                    </tr>
+                `).join('');
+
+                return `
+                    <div class="order-ticket">
+                        <div class="ticket-header">
+                            <div>
+                                <span style="font-size:1.15rem; font-weight:800; color:var(--secondary);">Order #${order.order_id}</span>
+                                <span style="color:var(--text-light); margin-left:8px; font-size:0.85rem;">${order.order_date || 'Today'}</span>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                ${paymentBadge}
+                                <span style="padding:5px 12px; border-radius:20px; font-size:0.82rem; ${statusBadgeStyle}">
+                                    ● ${order.status}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="ticket-body">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                                <div>
+                                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-light); text-transform:uppercase;">Customer & Delivery Address</div>
+                                    <div style="font-weight:700; color:var(--secondary);">${customerName} (📞 ${customerPhone})</div>
+                                    <div style="font-size:0.9rem; color:var(--text-muted);">${order.delivery_address || 'Address on file'}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-light); text-transform:uppercase;">Total Bill</div>
+                                    <div style="font-size:1.25rem; font-weight:800; color:var(--primary);">₹${order.total_amount}</div>
+                                </div>
+                            </div>
+
+                            <div style="background:#f8fafc; border-radius:var(--radius-sm); padding:10px 14px; border:1px solid #e2e8f0;">
+                                <div style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Kitchen Ticket Items:</div>
+                                <table class="items-list-table">
+                                    ${itemsRows}
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="ticket-footer">
+                            <div style="font-size:0.85rem; color:var(--text-muted);">
+                                Step: <strong>${order.status}</strong>
+                            </div>
+                            <div>
+                                ${actionHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.handleAdvanceStatus = async function(orderId, nextStatus) {
+            try {
+                const res = await Store.updateOrderStatus(orderId, nextStatus);
+                if (res.success) {
+                    App.showToast(`Order #${orderId} marked as ${nextStatus}`, 'success');
+                    await loadOrders();
+                } else {
+                    App.showToast(res.message || 'Failed to update order', 'error');
+                }
+            } catch (err) {
+                App.showToast('Network error updating status', 'error');
+            }
+        };
+
+        window.handleDispatchWithCourier = async function(orderId) {
+            const selectEl = document.getElementById(`courierSelect_${orderId}`);
+            const courierId = selectEl ? selectEl.value : null;
+
+            try {
+                const res = await Store.updateOrderStatus(orderId, 'Out for Delivery', courierId);
+                if (res.success) {
+                    App.showToast(`Order #${orderId} handed over to courier for delivery!`, 'success');
+                    await loadOrders();
+                } else {
+                    App.showToast(res.message || 'Failed to dispatch order', 'error');
+                }
+            } catch (err) {
+                App.showToast('Network error dispatching order', 'error');
+            }
+        };
+    </script>
+</body>
+</html>

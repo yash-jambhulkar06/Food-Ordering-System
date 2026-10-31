@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Delivery Hub Sign In – SpiceRoute</title>
+    <meta name="description" content="Dedicated mobile-friendly sign in portal for SpiceRoute delivery couriers.">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚴</text></svg>">
+    <style>
+        .delivery-auth-card {
+            background: #fff;
+            border-radius: var(--radius-lg);
+            border: 1px solid #bbf7d0;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.08);
+            padding: 36px 32px;
+            max-width: 440px;
+            margin: 0 auto;
+        }
+        .delivery-icon-badge {
+            width: 60px;
+            height: 60px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 16px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+    </style>
+</head>
+<body style="background:#f0fdf4;">
+
+    <!-- Top Navigation -->
+    <header class="navbar" style="background:#fff; border-bottom:1px solid #bbf7d0;">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon" style="background:var(--success);">🚴</div>
+                <span>Spice<span>Route</span> <small style="font-size:0.75rem; color:var(--success); font-weight:700; text-transform:uppercase; margin-left:4px;">Delivery</small></span>
+            </a>
+
+            <div class="nav-actions">
+                <a href="../index.html" class="btn btn-outline btn-sm">Customer Site</a>
+                <a href="../hotel/login.html" class="btn btn-outline btn-sm" style="color:#b45309; border-color:#fde68a;">🏨 Hotel Portal</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Delivery Sign In Container -->
+    <section class="section" style="padding: 60px 0 80px;">
+        <div class="container">
+            <div class="delivery-auth-card">
+                <div style="text-align:center; margin-bottom:28px;">
+                    <div class="delivery-icon-badge">🛵</div>
+                    <h1 style="font-size:1.75rem; color:#14532d; margin-bottom:6px;">Delivery Hub Sign In</h1>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Sign in to view your route deliveries & complete orders</p>
+                </div>
+
+                <!-- Error Message Alert -->
+                <div id="deliveryErrorAlert" style="display:none; background:var(--danger-light); color:#991b1b; border:1px solid #fecaca; border-radius:var(--radius-md); padding:12px 16px; margin-bottom:20px; font-size:0.92rem; align-items:center; gap:8px;">
+                    <span>⚠️</span>
+                    <span id="deliveryErrorMsg">Invalid courier credentials</span>
+                </div>
+
+                <form id="deliveryLoginForm">
+                    <div class="form-field">
+                        <label for="deliveryEmail" class="field-label">Courier Email Address *</label>
+                        <input type="email" id="deliveryEmail" class="input-control" placeholder="delivery1@spiceroute.in" required autocomplete="username">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="deliveryPassword" class="field-label">Password *</label>
+                        <input type="password" id="deliveryPassword" class="input-control" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" id="deliverySubmitBtn" class="btn btn-block btn-lg" style="background:var(--success); color:#fff; font-weight:700; margin-top:10px;">
+                        Sign In to Delivery Dashboard &rarr;
+                    </button>
+                </form>
+
+                <!-- Quick Demo Login -->
+                <div style="margin-top:24px; padding:16px; background:#f0fdf4; border:1px dashed #22c55e; border-radius:var(--radius-sm); text-align:center;">
+                    <div style="font-size:0.8rem; font-weight:700; color:#166534; margin-bottom:8px; text-transform:uppercase;">Quick Demo Courier Logins</div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <button type="button" onclick="fillCourierDemo('1')" class="btn btn-sm btn-block" style="background:#fff; color:#166534; border:1px solid #86efac; font-weight:700;">
+                            🚴 Fill Courier 1 (Suresh Patil)
+                        </button>
+                        <button type="button" onclick="fillCourierDemo('2')" class="btn btn-sm btn-block" style="background:#fff; color:#166534; border:1px solid #86efac; font-weight:700;">
+                            🚴 Fill Courier 2 (Amit Kumar)
+                        </button>
+                    </div>
+                </div>
+
+                <div style="text-align:center; margin-top:24px; font-size:0.85rem; color:var(--text-muted);">
+                    Customer looking for food menu? <a href="../login.html" style="color:var(--success); font-weight:700;">Customer Sign In</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-wrap">
+        <div class="container text-center">
+            <p style="font-size:0.85rem; color:var(--text-muted);">&copy; 2026 SpiceRoute Restaurant Delivery Logistics.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('deliveryLoginForm');
+            const emailInput = document.getElementById('deliveryEmail');
+            const passInput = document.getElementById('deliveryPassword');
+            const errorAlert = document.getElementById('deliveryErrorAlert');
+            const errorMsg = document.getElementById('deliveryErrorMsg');
+            const submitBtn = document.getElementById('deliverySubmitBtn');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorAlert.style.display = 'none';
+
+                const email = emailInput.value.trim();
+                const password = passInput.value.trim();
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Verifying...';
+
+                const result = await Store.login(email, password);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign In to Delivery Dashboard →';
+
+                if (result.success) {
+                    if (result.user.role === 'delivery') {
+                        App.showToast(`Welcome, ${result.user.name}`, 'success');
+                        setTimeout(() => {
+                            window.location.replace('index.html');
+                        }, 400);
+                    } else {
+                        errorMsg.textContent = 'Access restricted to Delivery Couriers.';
+                        errorAlert.style.display = 'flex';
+                        App.showToast('Not authorized for Delivery panel', 'error');
+                    }
+                } else {
+                    errorMsg.textContent = result.message || 'Invalid email or password';
+                    errorAlert.style.display = 'flex';
+                    App.showToast('Invalid credentials', 'error');
+                    passInput.value = '';
+                    passInput.focus();
+                }
+            });
+
+            window.fillCourierDemo = function(num) {
+                if (num === '2') {
+                    emailInput.value = 'delivery2@spiceroute.in';
+                } else {
+                    emailInput.value = 'delivery1@spiceroute.in';
+                }
+                passInput.value = 'Delivery@123';
+            };
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Placed Successfully – SpiceRoute</title>
+    <meta name="description" content="Your culinary order has been received and the kitchen is preparing your dishes.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍛</text></svg>">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-icon">🍛</div>
+                <span>Spice<span>Route</span></span>
+            </a>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="menu.html" class="nav-link">Menu</a></li>
+                <li><a href="orders.html" class="nav-link active">My Orders</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="cart.html" class="cart-btn-link" title="Shopping Cart">
+                    <span>🛒 Cart</span>
+                    <span class="cart-badge-count" id="navCartBadge">0</span>
+                </a>
+                <div id="navUserSlot" style="display:flex; align-items:center; gap:12px;"></div>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">&#9776;</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Confirmation Main Container -->
+    <section class="section" style="padding: 50px 0 80px;">
+        <div class="container" style="max-width:820px;">
+            <div class="panel-card" style="text-align:center; padding:48px 36px;">
+                <div style="width:76px; height:76px; background:var(--success-light); color:var(--success); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.4rem; margin:0 auto 20px;">
+                    ✓
+                </div>
+
+                <!-- Exact Required Screen Title -->
+                <h1 id="orderConfirmationTitle" style="font-size:2rem; color:var(--secondary); margin-bottom:12px;">
+                    Order Placed Successfully – Order ID <span id="confOrderId">1001</span> – Status: <span id="confOrderStatus" style="color:var(--warning);">Preparing</span>
+                </h1>
+
+                <p style="color:var(--text-muted); font-size:1.05rem; max-width:540px; margin:0 auto 28px;">
+                    Your payment was authorized successfully. The kitchen team has received your ticket and is preparing your meals.
+                </p>
+
+                <!-- Order Stepper -->
+                <div class="tracking-stepper-wrap" style="text-align:left; margin-bottom:32px;">
+                    <div class="order-stepper" id="confirmationStepper">
+                        <div class="stepper-step active" id="stepPlaced">
+                            <div class="stepper-circle">📝</div>
+                            <div class="stepper-title">Placed</div>
+                        </div>
+                        <div class="stepper-step" id="stepPreparing">
+                            <div class="stepper-circle">🍳</div>
+                            <div class="stepper-title">Preparing</div>
+                        </div>
+                        <div class="stepper-step" id="stepPacked">
+                            <div class="stepper-circle">📦</div>
+                            <div class="stepper-title">Packed</div>
+                        </div>
+                        <div class="stepper-step" id="stepDelivery">
+                            <div class="stepper-circle">🛵</div>
+                            <div class="stepper-title">Out for Delivery</div>
+                        </div>
+                        <div class="stepper-step" id="stepDelivered">
+                            <div class="stepper-circle">🏠</div>
+                            <div class="stepper-title">Delivered</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Receipt Card -->
+                <div style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:24px; text-align:left; margin-bottom:30px;">
+                    <h3 style="font-size:1.15rem; margin-bottom:14px; color:var(--secondary); border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+                        Order Details
+                    </h3>
+
+                    <div id="confItemsList" style="margin-bottom:16px;">
+                        <!-- Injected order items -->
+                    </div>
+
+                    <div style="border-top:1px dashed var(--border-color); padding-top:14px; font-size:0.92rem; color:var(--text-muted);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span>Payment Method:</span>
+                            <strong id="confPaymentMode" style="color:var(--secondary);">UPI (Online Transfer)</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span>Delivery Address:</span>
+                            <span id="confAddress" style="text-align:right; max-width:320px; color:var(--secondary); font-weight:500;">Bandra West, Mumbai</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span>Estimated Delivery Time:</span>
+                            <span style="color:var(--success); font-weight:700;">Within 30-35 Minutes</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:800; color:var(--primary); margin-top:10px; padding-top:10px; border-top:1px solid var(--border-color);">
+                            <span>Total Paid:</span>
+                            <span id="confTotal">Rs. 550</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Links -->
+                <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+                    <a id="trackOrderBtn" href="orders.html" class="btn btn-primary btn-lg">
+                        Live Order Tracking &rarr;
+                    </a>
+                    <a href="menu.html" class="btn btn-outline btn-lg">
+                        Order More Food
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-wrap">
+        <div class="container">
+            <div class="footer-copyright">
+                <p>&copy; 2026 SpiceRoute Restaurant Private Limited. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/store.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order_id');
+
+            function populateOrder() {
+                const order = orderId ? Store.getOrderById(orderId) : (Store.getOrders()[0] || null);
+
+                if (order) {
+                    document.getElementById('confOrderId').textContent = order.order_id;
+                    document.getElementById('confOrderStatus').textContent = order.status;
+                    document.getElementById('confAddress').textContent = order.delivery_address + (order.pincode ? ` (${order.pincode})` : '');
+                    document.getElementById('confTotal').textContent = 'Rs. ' + order.total_amount;
+                    document.getElementById('confPaymentMode').textContent = order.payment ? `${order.payment.mode} (${order.payment.payment_status})` : 'Online Payment';
+
+                    const itemsContainer = document.getElementById('confItemsList');
+                    if (itemsContainer && order.items && order.items.length > 0) {
+                        itemsContainer.innerHTML = order.items.map(item => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:0.92rem;">
+                                <span><strong>${item.quantity}x</strong> ${item.name}</span>
+                                <span style="font-weight:600;">Rs. ${item.price * item.quantity}</span>
+                            </div>
+                        `).join('');
+                    }
+
+                    // Dynamic Stepper State Calculation
+                    const statusOrder = ['Placed', 'Preparing', 'Packed', 'Out for Delivery', 'Delivered'];
+                    const curIdx = statusOrder.indexOf(order.status);
+                    
+                    const elPlaced = document.getElementById('stepPlaced');
+                    const elPreparing = document.getElementById('stepPreparing');
+                    const elPacked = document.getElementById('stepPacked');
+                    const elDelivery = document.getElementById('stepDelivery');
+                    const elDelivered = document.getElementById('stepDelivered');
+
+                    if (elPlaced) elPlaced.className = `stepper-step ${curIdx >= 0 ? (curIdx === 0 ? 'active' : 'completed') : ''}`;
+                    if (elPreparing) elPreparing.className = `stepper-step ${curIdx >= 1 ? (curIdx === 1 ? 'active' : 'completed') : ''}`;
+                    if (elPacked) elPacked.className = `stepper-step ${curIdx >= 2 ? (curIdx === 2 ? 'active' : 'completed') : ''}`;
+                    if (elDelivery) elDelivery.className = `stepper-step ${curIdx >= 3 ? (curIdx === 3 ? 'active' : 'completed') : ''}`;
+                    if (elDelivered) elDelivered.className = `stepper-step ${curIdx >= 4 ? 'completed' : ''}`;
+
+                    document.getElementById('trackOrderBtn').href = `orders.html?track=${order.order_id}`;
+                }
+            }
+
+            populateOrder();
+            window.addEventListener('storeSynced', populateOrder);
+        });
+    </script>
+</body>
+</html>
