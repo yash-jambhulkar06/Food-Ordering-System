@@ -9,7 +9,35 @@
  */
 
 const Store = (() => {
-    const API_BASE = '/api';
+    // Production Render Backend API URL
+    const PRODUCTION_API_URL = 'https://food-ordering-system-muoj.onrender.com/api';
+
+    /**
+     * Determine the correct API base URL based on the runtime environment:
+     * 1. Manual override via localStorage (key: 'spiceroute_api_url')
+     * 2. Localhost on port 3000 -> use local relative '/api'
+     * 3. Localhost on other port (e.g. Live Server 5500) -> use 'http://localhost:3000/api'
+     * 4. Running directly on Render -> use relative '/api'
+     * 5. Cloudflare Workers (or any remote domain) -> use PRODUCTION_API_URL
+     */
+    const getApiBase = () => {
+        if (typeof window !== 'undefined' && window.location) {
+            const override = localStorage.getItem('spiceroute_api_url');
+            if (override) {
+                return override.replace(/\/+$/, '');
+            }
+            const { hostname, port, origin } = window.location;
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return (port === '3000' || !port) ? '/api' : 'http://localhost:3000/api';
+            }
+            if (origin && origin.includes('food-ordering-system-muoj.onrender.com')) {
+                return '/api';
+            }
+        }
+        return PRODUCTION_API_URL;
+    };
+
+    const API_BASE = getApiBase();
 
     const STORAGE_KEYS = {
         USER: 'spiceroute_user',
@@ -21,6 +49,8 @@ const Store = (() => {
     // Helper: Make API calls with JSON
     async function apiCall(endpoint, method = 'GET', body = null) {
         try {
+            const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+            const url = `${API_BASE}${cleanEndpoint}`;
             const options = {
                 method,
                 headers: { 'Content-Type': 'application/json' }
@@ -28,12 +58,15 @@ const Store = (() => {
             if (body && (method === 'POST' || method === 'PUT')) {
                 options.body = JSON.stringify(body);
             }
-            const res = await fetch(`${API_BASE}${endpoint}`, options);
+            const res = await fetch(url, options);
             const data = await res.json();
             return data;
         } catch (err) {
             console.error(`API Error [${method} ${endpoint}]:`, err);
-            return { success: false, message: 'Server communication error. Please check server.' };
+            return {
+                success: false,
+                message: 'Server communication error. (Note: Render free tier may take ~30-50s to wake up if sleeping).'
+            };
         }
     }
 
@@ -56,6 +89,11 @@ const Store = (() => {
     }
 
     return {
+        // Expose current API base for inspection/debugging
+        getApiBase() {
+            return API_BASE;
+        },
+
         // ================= AUTHENTICATION =================
         getCurrentUser() {
             return getLocal(STORAGE_KEYS.USER, null);
