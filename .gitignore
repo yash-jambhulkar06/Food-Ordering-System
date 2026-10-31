@@ -1,0 +1,17 @@
+# Node modules
+node_modules/
+
+# SQLite temporary journal / WAL files
+backend/data/*.sqlite-shm
+backend/data/*.sqlite-wal
+backend/data/*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+
+# OS & Editor files
+.DS_Store
+desktop.ini
+Thumbs.db
+.vscode/
+.idea/
